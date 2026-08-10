@@ -1642,7 +1642,7 @@ function generateDailyReport(dateISO){
 
 /* ============ 我的 ============ */
 $('#exportBtn').onclick=()=>{
-  const json=JSON.stringify(S,null,2);
+  const json=JSON.stringify(Object.assign({},S,{modules:moduleCfg}),null,2);
   const blob=new Blob([json],{type:'application/json'});
   const dlName='我的工作台_'+todayStr()+'.json';
   modal(`<h4>导出数据</h4>
@@ -1690,7 +1690,7 @@ function openImportPaste(){
 function confirmOverwrite(d){
   modal(`<h4>确认导入</h4><p style="color:var(--text-2)">导入将<b>覆盖</b>当前全部数据，且不可恢复。确定继续？</p>
     <div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="ok" id="impOk" style="background:var(--bad)">覆盖导入</button></div>`);
-  $('#impOk').onclick=()=>{S=Object.assign(structuredClone(DEFAULT),d);persist();closeModal();renderAll();toast('导入成功')};
+  $('#impOk').onclick=()=>{S=Object.assign(structuredClone(DEFAULT),d);if(Array.isArray(d.modules))restoreModules(d.modules);persist();closeModal();renderAll();toast('导入成功')};
 }
 $('#mergeBtn').onclick=()=>$('#mergeFile').click();
 $('#mergeFile').onchange=e=>{
@@ -1770,6 +1770,7 @@ function mergeData(d){
   if(add.moods)chips.push(`<span class="qn-pv-chip">新增 <b>${add.moods}</b>条心情</span>`);
   if(add.worklog)chips.push(`<span class="qn-pv-chip">新增 <b>${add.worklog}</b>条工作日志</span>`);
   if(!chips.length)chips.push('<span class="qn-pv-chip" style="color:var(--text-3)">无新数据（全部已存在）</span>');
+  if(Array.isArray(d.modules))restoreModules(d.modules);
   return{chips,warns:[]};
 }
 $('#budgetBtn').onclick=()=>{
@@ -1965,6 +1966,7 @@ async function cloudPull(opts={}){
     const shouldApply=force||!S.updatedAt||remote.updatedAt>S.updatedAt;
     if(shouldApply){
       S=remote;if(!S.worklog)S.worklog=[];if(!S.notes)S.notes=[];if(!S.countdowns)S.countdowns=[];if(!S.moods)S.moods={};if(!S.habits)S.habits=[];if(!S.todos)S.todos=[];if(!S.ledger)S.ledger=[];
+      if(Array.isArray(remote.modules))restoreModules(remote.modules);
       save();renderAll();
       setSyncStatus('ok');toast(force?'已从云端恢复':'已从云端同步');
     }else{setSyncStatus('ok');schedulePush()}
@@ -2010,6 +2012,7 @@ async function restoreGistRevision(version){
   if(!r.ok)throw new Error('HTTP '+r.status);
   const restored=await decryptState(blob);
   S=normalizeState(restored);
+  if(Array.isArray(restored.modules))restoreModules(restored.modules);
   save();renderAll();setSyncStatus('ok');toast('已恢复历史版本');
 }
 async function openSyncHistory(){
@@ -2313,17 +2316,30 @@ const MODULES=[
   {id:'about',name:'关于',page:'me'}
 ];
 function defaultModuleConfig(){return MODULES.map(x=>({id:x.id,visible:true}))}
-function loadModuleConfig(){
-  try{
-    const raw=JSON.parse(localStorage.getItem(MODULE_KEY));
-    const base=Array.isArray(raw)?raw:defaultModuleConfig();
-    const seen=new Set(base.map(x=>x.id));
-    MODULES.forEach(m=>{if(!seen.has(m.id))base.push({id:m.id,visible:true})});
-    return base.filter(x=>MODULES.some(m=>m.id===x.id));
-  }catch(e){return defaultModuleConfig()}
+function normalizeModules(arr){
+  const base=Array.isArray(arr)?arr:[];
+  const seen=new Set(base.map(x=>x&&x.id));
+  MODULES.forEach(m=>{if(!seen.has(m.id))base.push({id:m.id,visible:true})});
+  return base.filter(x=>x&&MODULES.some(m=>m.id===x.id)).map(x=>({id:x.id,visible:!!x.visible}));
 }
-function saveModuleConfig(cfg){localStorage.setItem(MODULE_KEY,JSON.stringify(cfg))}
+function loadModuleConfig(){
+  try{return normalizeModules(JSON.parse(localStorage.getItem(MODULE_KEY)))}
+  catch(e){return defaultModuleConfig()}
+}
+function saveModuleConfig(cfg){
+  moduleCfg=cfg;
+  localStorage.setItem(MODULE_KEY,JSON.stringify(cfg));
+  if(S&&typeof S==='object'){S.modules=cfg;persist();}
+}
+function restoreModules(arr){
+  const cfg=normalizeModules(arr);
+  moduleCfg=cfg;
+  localStorage.setItem(MODULE_KEY,JSON.stringify(cfg));
+  if(S&&typeof S==='object'){S.modules=cfg;}
+  save();
+}
 let moduleCfg=loadModuleConfig();
+if(!S.modules)S.modules=moduleCfg;
 function applyModuleLayout(){
   const byPage={today:$('#page-today'),money:$('#page-money'),heat:$('#page-heat'),history:$('#page-history'),notes:$('#page-notes'),me:$('#page-me')};
   moduleCfg.forEach(c=>{

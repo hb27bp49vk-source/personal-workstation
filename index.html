@@ -794,7 +794,7 @@ summary::-webkit-details-marker{color:var(--text)}
       <div class="sec" data-module="about">
         <div class="page-title">关于</div>
         <div class="card">
-          <div class="row-between" style="margin-bottom:6px"><span class="lab">我的工作台</span><span class="val">v3.8</span></div>
+          <div class="row-between" style="margin-bottom:6px"><span class="lab">我的工作台</span><span class="val">v3.8.1</span></div>
           <p class="muted" style="margin:0">墨白极简 · 单文件 HTML · 本地存储 · 断网可用 · 由 WorkBuddy 搭建<br>v3.8 · 历史信息新增「历史日报」视图，可按日期区间查询并一键复制/批量复制日报</p>
         </div>
       </div>
@@ -831,6 +831,13 @@ const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.8.1',date:'2026-08-12',modules:['云同步'],items:[
+    '修复跨设备同步丢数据：原同步为「整状态 last-write-wins 覆盖」，本地未上云记录会被更高时间戳的云端版本整覆盖（如手机记了一笔账但没推上云，电脑端同步后被冲掉）',
+    '改为按 id 合并同步：本地已有记录永不删除，只补回云端有而本地没有的记录',
+    '推送失败改为指数退避自动重试（5s→10s→…上限 60s）',
+    '页面切后台/关闭时强制 flush 本地未上云数据，缩小"本地有、云端没有"的窗口',
+    '「立即同步」改为真正的双向同步（先推本地再拉云合并），不再是无条件覆盖本地'
+  ],status:'已发布'},
   {version:'v3.7-test',date:'2026-08-10',modules:['账本'],items:[
     '账单「支出类型」新增「计入月预算」开关：可逐类选择是否计入月预算，关闭的类型仍记为支出（成本）但不占用预算额度、不计入超支判断',
     '月预算进度条与超支判断改为仅统计「计入月预算」的类型，并在预算区显示「其中 X 不计入预算」',
@@ -1969,8 +1976,9 @@ async function cloudPush(){
     const blob=await encryptState(S,syncCfg.salt);
     const r=await fetch(GITHUB_API+'/'+syncCfg.binId,{method:'PATCH',headers:GH_HEADERS(syncCfg.masterKey),body:JSON.stringify({files:{'data.json':{content:JSON.stringify(blob)}}})});
     if(!r.ok)throw new Error('HTTP '+r.status);
+    syncRetryCount=0;clearTimeout(syncRetryTimer);
     setSyncStatus('ok');
-  }catch(e){setSyncStatus('err');console.warn('push fail',e.message)}
+  }catch(e){setSyncStatus('err');console.warn('push fail',e.message);schedulePushRetry();}
   finally{syncBusy=false}
 }
 
@@ -1978,6 +1986,37 @@ function schedulePush(){
   if(!syncCfg||!syncCfg.binId)return;
   clearTimeout(syncTimer);
   syncTimer=setTimeout(cloudPush,3000);
+}
+/* push 失败指数退避重试：5s→10s→15s… 上限 60s，成功即清零 */
+let syncRetryCount=0;
+let syncRetryTimer=null;
+function schedulePushRetry(){
+  if(!syncCfg||!syncCfg.binId)return;
+  syncRetryCount++;
+  const delay=Math.min(60000,5000*syncRetryCount);
+  clearTimeout(syncRetryTimer);
+  syncRetryTimer=setTimeout(cloudPush,delay);
+}
+
+/* 按 id 合并本地与云端：本地已有记录永不删除，只补回云端有而本地没有的记录
+   —— 根治原 last-write-wins 整覆盖导致跨设备丢数据的问题（如某笔账本地未上云被云端旧版本覆盖） */
+function mergeState(remote){
+  let changed=false;
+  const unionArr=(loc,rem)=>{
+    const map=new Map();
+    (loc||[]).forEach(x=>{if(x&&x.id)map.set(x.id,x)});
+    (rem||[]).forEach(x=>{if(x&&x.id&&!map.has(x.id)){map.set(x.id,x);changed=true}});
+    return [...map.values()];
+  };
+  ['todos','habits','ledger','notes','countdowns','worklog'].forEach(k=>{ S[k]=unionArr(S[k],remote[k]); });
+  if(remote.learning&&S.learning){
+    ['directions','contents','plans','questions','reviews'].forEach(k=>{ S.learning[k]=unionArr(S.learning[k],remote.learning[k]); });
+  }
+  if(remote.moods&&typeof remote.moods==='object'){
+    S.moods=S.moods||{};
+    Object.keys(remote.moods).forEach(d=>{ if(!(d in S.moods)){S.moods[d]=remote.moods[d];changed=true;} });
+  }
+  return changed;
 }
 
 async function cloudPull(opts={}){
@@ -1994,13 +2033,18 @@ async function cloudPull(opts={}){
     const blob=JSON.parse(content);
     if(!blob||!blob.ct){setSyncStatus('ok');if(!force)schedulePush();return true}
     const remote=await decryptState(blob);
-    const shouldApply=force||!S.updatedAt||remote.updatedAt>S.updatedAt;
-    if(shouldApply){
+    if(force){
+      /* 历史版本恢复：用户主动操作的整覆盖，保留 force 语义 */
       S=remote;if(!S.worklog)S.worklog=[];if(!S.notes)S.notes=[];if(!S.countdowns)S.countdowns=[];if(!S.moods)S.moods={};if(!S.habits)S.habits=[];if(!S.todos)S.todos=[];if(!S.ledger)S.ledger=[];
       if(Array.isArray(remote.modules))restoreModules(remote.modules);
       save();renderAll();
-      setSyncStatus('ok');toast(force?'已从云端恢复':'已从云端同步');
-    }else{setSyncStatus('ok');schedulePush()}
+      setSyncStatus('ok');toast('已从云端恢复');
+      return true;
+    }
+    /* 常规同步：合并而非覆盖，本地记录永不丢失 */
+    const changed=mergeState(remote);
+    if(changed){ S.updatedAt=Date.now(); save(); renderAll(); }
+    setSyncStatus('ok'); schedulePush(); /* 合并后把并集推回云端，保证两端一致 */
     return true;
   }catch(e){
     if(e.message&&e.message.includes('decrypt')){setSyncStatus('err');toast('Passcode 错误，无法解密')}
@@ -2124,7 +2168,7 @@ function openSyncSetup(){
     const s2=$('#syncStatus2');
     const ss=$('#syncStatus');
     if(ss)s2.className=ss.className,s2.textContent=ss.textContent;
-    $('#syncNowBtn').onclick=async()=>{closeModal();await cloudPull({force:true})};
+    $('#syncNowBtn').onclick=async()=>{closeModal();await cloudPush();await cloudPull();toast('已双向同步')};
     $('#syncCopyBtn').onclick=()=>{navigator.clipboard?.writeText(syncCfg.binId).then(()=>toast('Gist ID 已复制'),()=>toast('复制失败'))};
     $('#syncHistoryBtn').onclick=openSyncHistory;
     $('#syncDisableBtn').onclick=()=>{
@@ -2522,6 +2566,9 @@ if(syncCfg&&syncCfg.binId){
     setInterval(()=>{if(navigator.onLine)cloudPull()},60000);
   });
   window.addEventListener('online',()=>{cloudPull();schedulePush()});
+  /* 页面切到后台/关闭时强制把本地未上云的数据 flush 出去，缩小"本地有、云端没有"的窗口 */
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&syncCfg&&syncCfg.binId) cloudPush(); });
+  window.addEventListener('pagehide',()=>{ if(syncCfg&&syncCfg.binId) cloudPush(); });
 }else{
   setSyncStatus('off');
 }

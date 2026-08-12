@@ -766,6 +766,7 @@ summary::-webkit-details-marker{color:var(--text)}
         <div class="card">
           <div class="set-row" id="syncRow"><span class="lab">状态</span><span id="syncStatus" class="sync-dot off">未开启</span></div>
           <div class="set-row"><span class="lab">云同步设置</span><button id="syncBtn">设置</button></div>
+          <div class="set-row" style="align-items:center"><span class="lab" style="color:var(--bad)">数据被污染？一键恢复</span><button id="syncHistoryBtnDirect" style="color:#fff;background:var(--bad);border:none;border-radius:var(--r-sm);padding:8px 14px;font-weight:600">历史版本恢复</button></div>
           <div class="privacy-box">
             <b>隐私保障</b><br>
             · 数据经 <b>AES-GCM 端到端加密</b>后存于 GitHub Gist（私有），仅持有 Passcode 的你能解密<br>
@@ -2232,6 +2233,7 @@ function openSyncSetup(){
 }
 
 $('#syncBtn').onclick=openSyncSetup;
+$('#syncHistoryBtnDirect').onclick=openSyncHistory;
 
 
 /* ============ 更新日志 ============ */

@@ -420,6 +420,22 @@ summary::-webkit-details-marker{color:var(--text)}
 .hist-row .hr-amt{font-weight:700;font-size:13.5px;flex:none;white-space:nowrap}
 .hist-more{width:100%;margin-top:6px;padding:9px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;color:var(--text);font-weight:600;font-size:13px}
 
+/* 历史日报 · 查询 + 复制 */
+.his-mode{display:flex;gap:8px;margin-bottom:12px}
+.his-mode button{flex:1;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card-soft);color:var(--text-2);font-weight:600;font-size:13.5px;transition:all .15s}
+.his-mode button.on{background:var(--text);color:#fff;border-color:var(--text)}
+.his-mode button:active{transform:scale(.98)}
+.hrpt-item{border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:10px;overflow:hidden;background:var(--card)}
+.hrpt-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--card-soft);border-bottom:1px solid var(--line-soft)}
+.hrpt-date{font-weight:700;font-size:13.5px}
+.hrpt-sum{font-size:11.5px;color:var(--text-3);white-space:nowrap}
+.hrpt-actions{display:flex;gap:8px;padding:9px 12px}
+.hrpt-actions button{flex:1;padding:9px;border-radius:var(--r-sm);font-weight:600;font-size:13px;border:1px solid var(--line)}
+.hrpt-view{background:var(--card-soft);color:var(--text)}
+.hrpt-view:hover{border-color:var(--text)}
+.hrpt-copy{background:var(--text);color:#fff;border-color:var(--text)}
+.hrpt-copy:active{transform:scale(.98)}
+
 /* ====== 超大弹窗（日报 / 导出） ====== */
 .modal.xl{max-width:780px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .modal.xl h4{flex:none}
@@ -464,7 +480,7 @@ summary::-webkit-details-marker{color:var(--text)}
         <div class="date" id="hDate"></div>
         <div class="greet"><span class="dot"></span><span id="hGreet">你好</span></div>
         <div class="sub" id="hSub"></div>
-        <div class="sub" style="margin-top:4px;color:var(--text-3);font-weight:600">显示/隐藏/排序设置保存在本机浏览器</div>
+        <div class="sub" style="margin-top:4px;color:var(--text-3)">模块可显示/隐藏与排序，设置只保存在本机浏览器</div>
       </div>
       <button class="refresh-btn" id="refreshBtn" title="刷新页面">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -477,7 +493,7 @@ summary::-webkit-details-marker{color:var(--text)}
     <input type="file" id="importFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" hidden>
     <div class="module-manager-entry">
-      <div><div class="t">模块管理</div><div class="s">可调整各模块显示/隐藏与排序，设置保存在本机浏览器</div></div>
+      <div><div class="t">模块管理</div><div class="s">显示/隐藏与排序模块，设置只保存在本机浏览器</div></div>
       <button id="moduleManageBtn">编辑模块</button>
     </div>
 
@@ -661,45 +677,59 @@ summary::-webkit-details-marker{color:var(--text)}
     <!-- 历史 -->
     <section class="page" id="page-history">
       <div class="sec" data-module="history">
-        <div class="page-title">历史信息 · 按时间筛选</div>
-        <div class="card">
-          <div class="filter-bar">
-            <div class="fb-row">
-              <span class="fb-lab">日期</span>
-              <input type="date" id="hisFrom">
-              <span class="fb-lab">至</span>
-              <input type="date" id="hisTo">
-            </div>
-            <div class="fb-row quick-chips" id="hisQuick">
-              <button class="quick-chip" data-r="today">今天</button>
-              <button class="quick-chip" data-r="yesterday">昨天</button>
-              <button class="quick-chip on" data-r="7">近7天</button>
-              <button class="quick-chip" data-r="30">近30天</button>
-              <button class="quick-chip" data-r="thisMonth">本月</button>
-              <button class="quick-chip" data-r="lastMonth">上月</button>
-              <button class="quick-chip" data-r="all">全部</button>
-            </div>
-            <div class="fb-row quick-chips" id="hisKind">
-              <button class="quick-chip on" data-k="all">全部类型</button>
-              <button class="quick-chip" data-k="worklog">工作日志</button>
-              <button class="quick-chip" data-k="todo">待办</button>
-              <button class="quick-chip" data-k="habit">打卡</button>
-              <button class="quick-chip" data-k="ledger">账目</button>
-              <button class="quick-chip" data-k="mood">心情</button>
-              <button class="quick-chip" data-k="note">备忘</button>
-            </div>
-            <div class="fb-row">
-              <input class="fb-kw" id="hisKw" placeholder="搜索关键词（内容 / 分类 / 备注）">
-              <button class="quick-chip" id="hisReset">重置</button>
-            </div>
-            <div class="filter-sum" id="hisSum"></div>
+        <div class="page-title">历史信息</div>
+        <div class="his-mode" id="hisMode">
+          <button class="on" data-m="timeline">时间线记录</button>
+          <button data-m="report">历史日报</button>
+        </div>
+        <div class="filter-bar" id="hisFilter">
+          <div class="fb-row">
+            <span class="fb-lab">日期</span>
+            <input type="date" id="hisFrom">
+            <span class="fb-lab">至</span>
+            <input type="date" id="hisTo">
           </div>
+          <div class="fb-row quick-chips" id="hisQuick">
+            <button class="quick-chip" data-r="today">今天</button>
+            <button class="quick-chip" data-r="yesterday">昨天</button>
+            <button class="quick-chip on" data-r="7">近7天</button>
+            <button class="quick-chip" data-r="30">近30天</button>
+            <button class="quick-chip" data-r="thisMonth">本月</button>
+            <button class="quick-chip" data-r="lastMonth">上月</button>
+            <button class="quick-chip" data-r="all">全部</button>
+          </div>
+          <div class="fb-row quick-chips" id="hisKind">
+            <button class="quick-chip on" data-k="all">全部类型</button>
+            <button class="quick-chip" data-k="worklog">工作日志</button>
+            <button class="quick-chip" data-k="todo">待办</button>
+            <button class="quick-chip" data-k="habit">打卡</button>
+            <button class="quick-chip" data-k="ledger">账目</button>
+            <button class="quick-chip" data-k="mood">心情</button>
+            <button class="quick-chip" data-k="note">备忘</button>
+          </div>
+          <div class="fb-row">
+            <input class="fb-kw" id="hisKw" placeholder="搜索关键词（内容 / 分类 / 备注）">
+            <button class="quick-chip" id="hisReset">重置</button>
+          </div>
+          <div class="filter-sum" id="hisSum"></div>
+        </div>
+        <div class="card" id="hisTimeline">
           <div class="hist-stat" id="hisStat"></div>
           <div id="hisList"></div>
           <button class="wl-report-btn" id="hisExport">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
             导出 / 复制所选区间记录
           </button>
+        </div>
+        <div id="hisReportView" style="display:none">
+          <div class="card">
+            <p class="muted" style="margin:0 0 12px;font-size:12.5px">按当前<b>日期区间</b>列出有记录的每一天工作日报。点「复制日报」可一键复制当天日报，点「查看」在弹窗中编辑或下载 .md；也可一键复制本区间全部日报。</p>
+            <button class="wl-report-btn" id="hisRptCopyAll">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              复制本区间全部日报
+            </button>
+            <div id="hisReportList"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -764,8 +794,8 @@ summary::-webkit-details-marker{color:var(--text)}
       <div class="sec" data-module="about">
         <div class="page-title">关于</div>
         <div class="card">
-          <div class="row-between" style="margin-bottom:6px"><span class="lab">我的工作台</span><span class="val">v3.7</span></div>
-          <p class="muted" style="margin:0">墨白极简 · 单文件 HTML · 本地存储 · 断网可用 · 由 WorkBuddy 搭建<br>v3.7 · 支出类型可逐类「计入月预算」· 账单明细饼图支持多选高亮 + 新增预算内支出构成饼图</p>
+          <div class="row-between" style="margin-bottom:6px"><span class="lab">我的工作台</span><span class="val">v3.8</span></div>
+          <p class="muted" style="margin:0">墨白极简 · 单文件 HTML · 本地存储 · 断网可用 · 由 WorkBuddy 搭建<br>v3.8 · 历史信息新增「历史日报」视图，可按日期区间查询并一键复制/批量复制日报</p>
         </div>
       </div>
     </section>
@@ -801,7 +831,7 @@ const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
-  {version:'v3.7',date:'2026-08-10',modules:['账本'],items:[
+  {version:'v3.7-test',date:'2026-08-10',modules:['账本'],items:[
     '账单「支出类型」新增「计入月预算」开关：可逐类选择是否计入月预算，关闭的类型仍记为支出（成本）但不占用预算额度、不计入超支判断',
     '月预算进度条与超支判断改为仅统计「计入月预算」的类型，并在预算区显示「其中 X 不计入预算」',
     '账本类型选择 chips 对「不计入预算」的类型显示虚线样式与橙色小点提示',
@@ -810,8 +840,9 @@ const CHANGELOG=[
     '布局优化：饼图从明细列表下方上移到「筛选区正下方」，筛选条件变化即时可见，无需再拉到底部；快捷筛选新增「今日 / 昨日」（与近7天 / 近30天等并列）',
     '新增第二张「预算内支出构成」饼图：只统计在「支出类型管理」中开启「计入月预算」的类型，与总饼图并列，同样支持多选高亮对比，便于单独看预算执行构成',
     '修复多选高亮对比不明显的 bug：修正后选中扇区为满色 + 白色描边，未选中扇区 fill-opacity 0.16，对比一眼可辨'
-  ],status:'已上线'},
-  {version:'v3.6',date:'2026-08-10',modules:['历史信息','工作日志','账本'],items:[
+  ],status:'测试中'},
+  {version:'v3.8',date:'2026-08-12',modules:['历史信息'],items:['历史信息新增「历史日报」视图：在「历史」页切换「历史日报」，按日期区间列出有记录每一天','每天支持「复制日报」一键复制当天工作日报，或「查看」在弹窗中编辑 / 下载 .md','新增「复制本区间全部日报」，可批量复制所选区间所有日报','日期区间筛选栏置于页签上方，时间线记录与历史日报共享同一套筛选条件'],status:'已发布'},
+  {version:'v3.6-test',date:'2026-08-10',modules:['历史信息','工作日志','账本'],items:[
     '新增「历史信息」模块与独立页签：不再只看今天，可按日期区间 + 类型 + 关键词回看全部历史记录',
     '历史信息支持今天/昨天/近7天/近30天/本月/上月/全部快捷筛选，按天分组展示并统计收支与打卡',
     '历史记录支持一键导出/复制为 Markdown',
@@ -819,8 +850,8 @@ const CHANGELOG=[
     '日报支持选择任意日期生成，不再局限于当天',
     '账单明细新增日期区间筛选、收支类型筛选与关键词搜索，并实时显示区间汇总',
     '记账分类新增「＋ 自定义」，可自行输入类型名称并选择颜色，支持删除（删除不影响历史账单）'
-  ],status:'已上线'},
-  {version:'v3.5',date:'2026-08-06',modules:['更新日志','模块管理'],items:['新增“更新日志”模块，用于沉淀每次迭代的升级功能清单','记录版本号、更新日期、涉及模块与功能点，前端可直接查看','更新日志模块纳入“编辑模块”，可显示/隐藏和排序'],status:'已上线'},
+  ],status:'测试中'},
+  {version:'v3.5-test',date:'2026-08-06',modules:['更新日志','模块管理'],items:['新增“更新日志”模块，用于沉淀每次迭代的升级功能清单','记录版本号、更新日期、涉及模块与功能点，前端可直接查看','更新日志模块纳入“编辑模块”，可显示/隐藏和排序'],status:'测试中'},
   {version:'v3.4',date:'2026-08-06',modules:['模块管理','备忘录'],items:['模块管理升正式版：支持模块显示/隐藏、上下排序、恢复默认','备忘录增强升正式版：长文本输入、保存后列表展示','每条备忘支持编辑、删除、标记完成/未完成，未完成优先展示'],status:'已上线'},
   {version:'v3.3-test',date:'2026-08-06',modules:['模块管理'],items:['新增测试版标识和“编辑模块”入口','支持模块显示/隐藏、上下排序、恢复默认','模块配置保存在浏览器 localStorage'],status:'测试通过'},
   {version:'v3.2',date:'2026-08-06',modules:['云同步'],items:['新增 GitHub Gist 私有云同步','数据使用 AES-GCM 端到端加密，本地 localStorage 保持离线兜底','支持历史版本查看与恢复'],status:'已上线'}
@@ -924,7 +955,7 @@ $$('nav.tabbar a').forEach(a=>a.addEventListener('click',()=>{
   $$('nav.tabbar a').forEach(x=>x.classList.remove('on'));a.classList.add('on');
   const p=a.dataset.p;$$('.page').forEach(x=>x.classList.remove('active'));
   $('#page-'+p).classList.add('active');
-  if(p==='today')renderWorklog();if(p==='money')renderMoney();if(p==='heat')renderHeat();if(p==='notes')renderNotes();if(p==='history')renderHistory();
+  if(p==='today')renderWorklog();if(p==='money')renderMoney();if(p==='heat')renderHeat();if(p==='notes')renderNotes();if(p==='history')renderActiveHis();
 }));
 function goTab(p){$(`nav.tabbar a[data-p="${p}"]`).click()}
 
@@ -2268,14 +2299,14 @@ function historyExportText(){
   });
   return L.join('\n');
 }
-$$('#hisQuick .quick-chip').forEach(b=>b.onclick=()=>{const[f,t]=rangeOf(b.dataset.r);setHisRange(f,t,b.dataset.r);hisLimit=14;renderHistory()});
-$$('#hisKind .quick-chip').forEach(b=>b.onclick=()=>{hisFilterKind=b.dataset.k;$$('#hisKind .quick-chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');hisLimit=14;renderHistory()});
-$('#hisFrom').onchange=()=>{$$('#hisQuick .quick-chip').forEach(b=>b.classList.remove('on'));hisLimit=14;renderHistory()};
-$('#hisTo').onchange=()=>{$$('#hisQuick .quick-chip').forEach(b=>b.classList.remove('on'));hisLimit=14;renderHistory()};
-$('#hisKw').addEventListener('input',()=>{hisLimit=14;renderHistory()});
+$$('#hisQuick .quick-chip').forEach(b=>b.onclick=()=>{const[f,t]=rangeOf(b.dataset.r);setHisRange(f,t,b.dataset.r);hisLimit=14;hisReportLimit=14;renderActiveHis()});
+$$('#hisKind .quick-chip').forEach(b=>b.onclick=()=>{hisFilterKind=b.dataset.k;$$('#hisKind .quick-chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');hisLimit=14;renderActiveHis()});
+$('#hisFrom').onchange=()=>{$$('#hisQuick .quick-chip').forEach(b=>b.classList.remove('on'));hisLimit=14;hisReportLimit=14;renderActiveHis()};
+$('#hisTo').onchange=()=>{$$('#hisQuick .quick-chip').forEach(b=>b.classList.remove('on'));hisLimit=14;hisReportLimit=14;renderActiveHis()};
+$('#hisKw').addEventListener('input',()=>{hisLimit=14;renderActiveHis()});
 $('#hisReset').onclick=()=>{
   hisFilterKind='all';$$('#hisKind .quick-chip').forEach(x=>x.classList.toggle('on',x.dataset.k==='all'));
-  $('#hisKw').value='';const[f,t]=rangeOf('7');setHisRange(f,t,'7');hisLimit=14;renderHistory();toast('已重置筛选');
+  $('#hisKw').value='';const[f,t]=rangeOf('7');setHisRange(f,t,'7');hisLimit=14;hisReportLimit=14;renderActiveHis();toast('已重置筛选');
 };
 $('#hisExport').onclick=()=>{
   const txt=historyExportText();
@@ -2291,6 +2322,48 @@ $('#hisExport').onclick=()=>{
   $('#hisExpText').value=txt;
   $('#hisCopy').onclick=()=>copyText($('#hisExpText').value,'历史记录已复制');
   $('#hisDl').onclick=()=>downloadText($('#hisExpText').value,'历史记录_'+($('#hisFrom').value||'全部')+'_'+($('#hisTo').value||'至今')+'.md');
+};
+
+/* ============ 历史日报 · 查询 + 复制 ============ */
+let hisMode='timeline',hisReportLimit=14;
+function renderActiveHis(){ if(hisMode==='report') renderHisReportList(); else renderHistory(); }
+$$('#hisMode button').forEach(b=>b.onclick=()=>{
+  hisMode=b.dataset.m;
+  $$('#hisMode button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#hisTimeline').style.display = hisMode==='report'?'none':'';
+  $('#hisReportView').style.display = hisMode==='report'?'':'none';
+  hisLimit=14; hisReportLimit=14; renderActiveHis();
+});
+function renderHisReportList(){
+  if(!$('#hisReportList'))return;
+  const{ev:all,from,to}=filteredHistory();
+  const days=[...new Set(all.map(x=>x.date))].sort((a,b)=>b.localeCompare(a));
+  $('#hisSum').innerHTML=`${rangeLabel(from,to)} · 共 <b>${days.length}</b> 天可生成日报${hisFilterKind==='all'?'':' · 仅看'+HIS_KIND_NAME[hisFilterKind]}`;
+  const show=days.slice(0,hisReportLimit);
+  if(!show.length){ $('#hisReportList').innerHTML='<div class="empty-mini">所选时间区间内没有可生成日报的日期，换个日期或类型试试</div>'; return; }
+  $('#hisReportList').innerHTML=show.map(d=>{
+    const items=all.filter(x=>x.date===d);
+    let di=0,de=0; items.filter(x=>x.kind==='ledger').forEach(x=>{ if(x.type==='income')di+=x.amount; else de+=x.amount; });
+    const dd=new Date(d+'T00:00:00'); const wk=isNaN(dd)?'':'星期'+WEEK[dd.getDay()];
+    const meta=[items.length+' 条',de?'支'+money(de):'',di?'收'+money(di):''].filter(Boolean).join(' · ');
+    return `<div class="hrpt-item">
+      <div class="hrpt-head"><div class="hrpt-date">${d} ${wk}${d===todayStr()?' · 今天':''}</div><div class="hrpt-sum">${meta}</div></div>
+      <div class="hrpt-actions">
+        <button class="hrpt-view" data-d="${d}">查看</button>
+        <button class="hrpt-copy" data-d="${d}">复制日报</button>
+      </div>
+    </div>`;
+  }).join('')+(days.length>hisReportLimit?`<button class="hist-more" id="hisRptMore">继续加载（还有 ${days.length-hisReportLimit} 天）</button>`:'');
+  $$('#hisReportList .hrpt-view').forEach(b=>b.onclick=()=>generateDailyReport(b.dataset.d));
+  $$('#hisReportList .hrpt-copy').forEach(b=>b.onclick=()=>{ const r=buildDailyReport(b.dataset.d); copyText(r.report, r.dateStr+' 日报已复制'); });
+  const more=$('#hisRptMore'); if(more)more.onclick=()=>{ hisReportLimit+=14; renderHisReportList(); };
+}
+$('#hisRptCopyAll').onclick=()=>{
+  const{ev:all}=filteredHistory();
+  const days=[...new Set(all.map(x=>x.date))].sort((a,b)=>a.localeCompare(b));
+  if(!days.length){ toast('当前区间没有可复制的日报'); return; }
+  const txt=days.map(d=>buildDailyReport(d).report).join('\n\n---\n\n');
+  copyText(txt,'已复制 '+days.length+' 天日报');
 };
 
 /* ============ 模块管理 ============ */

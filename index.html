@@ -2193,8 +2193,17 @@ $('#syncBtn').onclick=openSyncSetup;
 /* ============ 更新日志 ============ */
 function renderChangelog(limit=3){
   const box=$('#changelogCard');if(!box)return;
-  const latest=CHANGELOG[0];
-  const list=CHANGELOG.slice(0,limit);
+  // 按版本号数字降序取"最新一条"，避免后续往数组里加新版本时漏挪位置导致顶部还停留在旧版
+  // 例：v3.10 > v3.9 > v3.8 > v3.7-test > v3.6-test ...
+  const parseVer=v=>v.version.replace(/[^0-9.]/g,'').split('.').map(n=>parseInt(n,10)||0);
+  const sorted=[...CHANGELOG].sort((a,b)=>{
+    const va=parseVer(a),vb=parseVer(b);
+    const len=Math.max(va.length,vb.length);
+    for(let i=0;i<len;i++){const x=va[i]||0,y=vb[i]||0;if(x!==y)return y-x;}
+    return 0;
+  });
+  const latest=sorted[0];
+  const list=sorted.slice(0,limit);
   box.innerHTML=`<div class="changelog-head">
     <div><div class="latest">${esc(latest.version)}</div><div class="date">最近更新：${esc(latest.date)}</div></div>
     <div class="changelog-badge">${esc(latest.status)}</div>

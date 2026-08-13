@@ -2421,7 +2421,7 @@ async function restoreGistRevision(version){
   save();renderAll();setSyncStatus('ok');toast('已恢复历史版本');
 }
 async function openSyncHistory(){
-  if(TEST_BUILD){toast('测试版不连接云同步');return}
+  if(TEST_BUILD)return;
   if(!syncCfg||!syncCfg.binId){toast('请先开启云同步');return}
   modal('<h4>历史版本恢复</h4><p class="muted" style="margin:0">正在读取 Gist 历史版本…</p>');
   $('#modalBox').classList.add('wide');

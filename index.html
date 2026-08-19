@@ -137,6 +137,29 @@ main{flex:1;padding:16px 16px calc(var(--tab-h) + 24px)}
 .habit-card .h-edit,.habit-card .h-del{width:22px;height:22px;border:none;border-radius:6px;background:var(--card-soft);color:var(--text-2);font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.8}
 .habit-card .h-del:active{background:rgba(176,74,74,.15);color:#b04a4a}
 
+/* ====== 补卡 ====== */
+.mk-datebar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mk-nav{width:34px;height:34px;border-radius:99px;border:1px solid var(--line);background:var(--card-soft);font-size:18px;color:var(--text);flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mk-nav:active{transform:scale(.93)}
+.mk-date{flex:1;text-align:center}
+.mk-date .mk-d{font-size:15px;font-weight:700}
+.mk-date input[type=date]{margin-top:4px;font-size:12px;color:var(--text-2);border:1px solid var(--line);border-radius:var(--r-xs);padding:4px 6px;background:var(--card-soft)}
+.mk-quick{display:flex;gap:8px;margin-bottom:10px}
+.mk-quick .quick-chip{flex:1}
+.mk-sum{font-size:13px;color:var(--text-2);margin-bottom:8px}
+.mk-list{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow:auto}
+.mk-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);cursor:pointer;transition:all .15s}
+.mk-row:active{transform:scale(.98)}
+.mk-row.on{border-color:var(--m-habits);background:rgba(106,181,138,.10)}
+.mk-ic{width:22px;height:22px;flex:none}
+.mk-name{flex:1;font-size:14px;font-weight:500}
+.mk-state{font-size:12px;color:var(--text-3)}
+.mk-row.on .mk-state{color:var(--m-habits)}
+.mk-toggle{width:22px;height:22px;border-radius:99px;border:1.5px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--m-habits);font-weight:700}
+.mk-row.on .mk-toggle{background:var(--m-habits);border-color:var(--m-habits);color:#fff}
+.ci-day{cursor:pointer}
+.ci-day:active{opacity:.7}
+
 /* ====== 记账 ====== */
 .money-head{display:flex;gap:10px;margin-bottom:12px}
 .money-head .seg{flex:1;display:flex;background:var(--card-soft);border:1px solid var(--line);border-radius:var(--r-sm);padding:3px}
@@ -682,8 +705,9 @@ summary::-webkit-details-marker{color:var(--text)}
         <div class="page-title">习惯打卡</div>
         <div class="card">
           <div class="habit-grid" id="habitGrid"></div>
-          <div style="margin-top:10px" id="habitAddWrap">
-            <button class="habit-add" id="habitAddBtn" style="width:100%"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="vertical-align:-3px;margin-right:5px"><path d="M12 5v14M5 12h14"/></svg>新建习惯</button>
+          <div style="margin-top:10px;display:flex;gap:8px" id="habitAddWrap">
+            <button class="habit-add" id="habitAddBtn" style="flex:1"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="vertical-align:-3px;margin-right:5px"><path d="M12 5v14M5 12h14"/></svg>新建习惯</button>
+            <button class="habit-add" id="habitMakeupBtn" style="flex:1"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.4 2.6L3 8"/><path d="M3 4v4h4"/></svg>补卡</button>
           </div>
         </div>
       </div>
@@ -822,7 +846,7 @@ summary::-webkit-details-marker{color:var(--text)}
       <div class="sec" data-module="checkins">
         <div class="page-title">打卡记录</div>
         <div class="card">
-          <div class="muted" style="margin:-2px 0 10px;font-size:12px">每日心情打卡与习惯打卡，含已删除习惯的归档历史</div>
+          <div class="muted" style="margin:-2px 0 10px;font-size:12px">每日心情打卡与习惯打卡，含已删除习惯的归档历史 · 点某天可补卡</div>
           <div id="checkinFeed" class="checkin-feed"></div>
         </div>
       </div>
@@ -1008,9 +1032,11 @@ const money=n=>{const v=Math.round(n*100)/100;return '¥'+v.toLocaleString('zh-C
 const toast=(m)=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800)};
 const WEEK=['日','一','二','三','四','五','六'];
 const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
+const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n);return fmtDate(d)};
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.12',date:'2026-08-19',modules:['习惯打卡'],items:['习惯打卡支持「补卡」：可补打过去任意一天的习惯卡，计入连续天数与活跃热力；在热力页「打卡记录」点击某天也可补卡'],status:'已上线'},
   {version:'v3.11',date:'2026-08-17',modules:['习惯打卡','打卡记录'],items:['模块显示/隐藏配置接入云同步：手机端开启或关闭模块会同步到其他设备（任一端显示即显示，避免跨设备丢失）','习惯打卡支持「修改」（改名/换图标/换颜色，保留已打卡历史）与「删除」（仅隐藏习惯，已记录的历史打卡归档保留，可在热力页「打卡记录」查看）','热力页新增「打卡记录」模块：以图标形式展示每日心情打卡与习惯打卡（含已删除习惯的归档历史）'],status:'已上线'},
   {version:'v3.10',date:'2026-08-12',modules:['学习'],items:['学习模块强化：内容/问题/复习可绑定到计划任务节点（双轨：也允许只挂方向）','新增计划节点聚合页：点任务小标题查看该节点下资料/问题/知识/复习','录入表单增加关联节点下拉；复习自动继承来源节点','新增tab：错题(难点归集)/资源(资料型)/大纲(树+计数)/时间轴/自测记录','知识库按节点聚合；问题可一键标记难点'],status:'已上线'},
   {version:'v3.9.1-test',date:'2026-08-12',modules:['云同步'],items:['同步防丢数据修复（与正式版 v3.8.1 同源）：改为按 id 合并同步，本地已有记录永不删除','推送失败指数退避自动重试（5s→10s→…上限60s）','页面切后台/关闭时强制 flush 本地未上云数据','「立即同步」改为先推本地再拉云合并的双向同步','注：本测试版同时含「学习」大模块（v3.9-test）'],status:'测试中'},
@@ -1284,6 +1310,7 @@ $('#habitGrid').addEventListener('contextmenu',e=>{
   const el=e.target.closest('.habit-card');if(!el)return;e.preventDefault();
   deleteHabit(el.dataset.id);
 });
+$('#habitMakeupBtn').onclick=()=>openMakeupModal();
 function editHabit(id){
   const h=S.habits.find(x=>x.id===id);if(!h)return;
   let pickI=h.iconIdx||0, pickC=HABIT_COLORS.indexOf(h.color);if(pickC<0)pickC=0;
@@ -1316,6 +1343,58 @@ function deleteHabit(id){
     S.habits=S.habits.filter(x=>x.id!==id);
     closeModal();persist();renderHabits();renderHeader();renderHeat();toast('已删除，历史已保留');
   };
+}
+/* ============ 习惯补卡 ============ */
+function openMakeupModal(preDate){
+  if(!S.habits.length){toast('还没有习惯，先新建一个吧');return}
+  const today=todayStr();
+  let sel=(preDate&&preDate<=today)?preDate:dateAdd(today,-1);
+  const floor=S.habits.reduce((m,h)=>{const c=h.createdAt||'';return(c&&c<m)?c:m;},'2000-01-01');
+  function paint(){
+    const t=sel;
+    const done=S.habits.filter(h=>h.history[t]).length;
+    const d=new Date(t+'T00:00:00');
+    const wk=isNaN(d)?'':'星期'+WEEK[d.getDay()];
+    const rows=S.habits.map(h=>{
+      const on=!!h.history[t];
+      return `<div class="mk-row ${on?'on':''}" data-id="${h.id}">
+        <span class="mk-ic" style="color:${h.color}">${catIcon(HABIT_ICONS[h.iconIdx]||'heart')}</span>
+        <span class="mk-name">${esc(h.name)}</span>
+        <span class="mk-state">${on?'已打卡':'未打卡'}</span>
+        <span class="mk-toggle">${on?'✓':''}</span>
+      </div>`;
+    }).join('');
+    modal(`<h4>补卡<span class="modal-close" onclick="closeModal()">×</span></h4>
+      <p class="muted" style="margin:-4px 0 12px;font-size:12px">为过去某天补打习惯卡，会计入连续天数与活跃热力。</p>
+      <div class="mk-datebar">
+        <button class="mk-nav" id="mkPrev">‹</button>
+        <div class="mk-date">
+          <div class="mk-d">${t} <span class="muted" style="font-size:12px">${wk}</span></div>
+          <input type="date" id="mkDate" value="${t}" max="${today}" min="${floor}">
+        </div>
+        <button class="mk-nav" id="mkNext">›</button>
+      </div>
+      <div class="mk-quick">
+        <button class="quick-chip" data-d="${dateAdd(today,-1)}">昨天</button>
+        <button class="quick-chip" data-d="${dateAdd(today,-2)}">前天</button>
+      </div>
+      <div class="mk-sum">${done}/${S.habits.length} 个习惯已打卡</div>
+      <div class="mk-list" id="mkList">${rows||'<div class="empty-mini">还没有习惯</div>'}</div>
+      <div class="btns"><button class="cancel" onclick="closeModal()">完成</button></div>
+    `,{noMaskClose:true});
+    $$('#mkList .mk-row').forEach(el=>{
+      el.onclick=()=>{
+        const h=S.habits.find(x=>x.id===el.dataset.id);if(!h)return;
+        if(h.history[t])delete h.history[t];else h.history[t]=1;
+        persist();renderHabits();renderHeader();renderHeat();paint();
+      };
+    });
+    $('#mkPrev').onclick=()=>{const nd=dateAdd(sel,-1);if(nd>=floor){sel=nd;paint()}else toast('已到最早可补卡日期')};
+    $('#mkNext').onclick=()=>{const nd=dateAdd(sel,1);if(nd<=today){sel=nd;paint()}else toast('不能给未来打卡哦')};
+    $('#mkDate').onchange=e=>{const v=e.target.value;if(v&&v<=today&&v>=floor){sel=v;paint()}else{e.target.value=sel;toast('日期无效')}};
+    $$('.mk-quick .quick-chip').forEach(b=>b.onclick=()=>{const v=b.dataset.d;if(v&&v<=today&&v>=floor){sel=v;paint()}});
+  }
+  paint();
 }
 $('#goMoney').onclick=()=>goTab('money');
 
@@ -1672,7 +1751,7 @@ function renderCheckins(){
       if(it.type==='mood') return `<span class="ci-chip mood" style="color:${it.color}" title="心情·${esc(it.name)}"><span class="ci-ic"><svg viewBox="0 0 24 24" fill="none" stroke="${it.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${it.svg}</svg></span><span class="ci-t">${esc(it.name)}</span></span>`;
       return `<span class="ci-chip habit ${it.arch?'arch':''}" style="color:${it.color}" title="${esc(it.name)}${it.arch?'（已删除习惯）':''}"><span class="ci-ic">${catIcon(it.icon)}</span><span class="ci-t">${esc(it.name)}</span></span>`;
     }).join('');
-    return `<div class="ci-day"><div class="ci-date">${ds.slice(5)} <span class="ci-wk">周${wk[d.getDay()]}</span></div><div class="ci-items">${items}</div></div>`;
+    return `<div class="ci-day" data-ds="${ds}"><div class="ci-date">${ds.slice(5)} <span class="ci-wk">周${wk[d.getDay()]}</span></div><div class="ci-items">${items}</div></div>`;
   }).join('');
 }
 const MOODS=[
@@ -2770,8 +2849,9 @@ function renderHistory(){
           </span>
         </div>`).join('')}</div>
     </div>`;
-  }).join('')+(dates.length>hisLimit?`<button class="hist-more" id="hisMore">继续加载（还有 ${dates.length-hisLimit} 天）</button>`:'')
+  }).join('')   +(dates.length>hisLimit?`<button class="hist-more" id="hisMore">继续加载（还有 ${dates.length-hisLimit} 天）</button>`:'')
    :'<div class="empty-mini">所选时间区间内没有记录，换个日期或类型试试</div>';
+  $$('#checkinFeed .ci-day').forEach(d=>d.onclick=()=>openMakeupModal(d.dataset.ds));
   $$('#hisList .hist-row').forEach(row=>{
     row.querySelector('.hr-edit').onclick=(e)=>{e.stopPropagation();editHistoryRow(row)};
     row.querySelector('.hr-del').onclick=(e)=>{e.stopPropagation();deleteHistoryRow(row)};

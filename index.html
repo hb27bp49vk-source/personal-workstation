@@ -1036,6 +1036,7 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.13',date:'2026-08-21',modules:['习惯打卡','云同步'],items:['修复「习惯连续天数显示不正确」：① 统计起点改为「createdAt 与最早打卡记录中的较早者」，修复旧数据缺 createdAt 时被截断为 1 天；② 云同步合并时本地 history 为 undefined 的引用丢失 bug（历史被清空），并改为 createdAt 取两端较早者，避免同步后连续天数被截断'],status:'已上线'},
   {version:'v3.12',date:'2026-08-19',modules:['习惯打卡'],items:['习惯打卡支持「补卡」：可补打过去任意一天的习惯卡，计入连续天数与活跃热力；在热力页「打卡记录」点击某天也可补卡'],status:'已上线'},
   {version:'v3.11',date:'2026-08-17',modules:['习惯打卡','打卡记录'],items:['模块显示/隐藏配置接入云同步：手机端开启或关闭模块会同步到其他设备（任一端显示即显示，避免跨设备丢失）','习惯打卡支持「修改」（改名/换图标/换颜色，保留已打卡历史）与「删除」（仅隐藏习惯，已记录的历史打卡归档保留，可在热力页「打卡记录」查看）','热力页新增「打卡记录」模块：以图标形式展示每日心情打卡与习惯打卡（含已删除习惯的归档历史）'],status:'已上线'},
   {version:'v3.10',date:'2026-08-12',modules:['学习'],items:['学习模块强化：内容/问题/复习可绑定到计划任务节点（双轨：也允许只挂方向）','新增计划节点聚合页：点任务小标题查看该节点下资料/问题/知识/复习','录入表单增加关联节点下拉；复习自动继承来源节点','新增tab：错题(难点归集)/资源(资料型)/大纲(树+计数)/时间轴/自测记录','知识库按节点聚合；问题可一键标记难点'],status:'已上线'},
@@ -1271,9 +1272,18 @@ function renderHabits(){
 }
 function habitStreak(h,t){
   let s=0;let d=new Date(t);d.setHours(0,0,0,0);
-  const created=new Date(h.createdAt||t);created.setHours(0,0,0,0);
+  /* 起点：取 createdAt 与「最早打卡记录」中较早者。
+     避免两种情况把连续天数截断为 1：
+       - 旧数据缺少 createdAt 字段（原逻辑会 fallback 到今天）；
+       - 同步后本地 createdAt 比实际打卡历史更晚。 */
+  let start=null;
+  if(h.createdAt){ const c=new Date(h.createdAt); c.setHours(0,0,0,0); if(!start||c<start)start=c; }
+  let e=null;
+  for(const k of Object.keys(h.history||{})){ if(e===null||k<e)e=k; }
+  if(e){ const ed=new Date(e); ed.setHours(0,0,0,0); if(!start||ed<start)start=ed; }
+  if(!start)return 0;
   const restUsed={};let guard=0;
-  while(d>=created&&guard<800){
+  while(d>=start&&guard<800){
     guard++;
     const ds=fmtDate(d);
     if(h.history[ds]){s++}
@@ -2414,12 +2424,13 @@ function mergeState(remote){
     (remote.habits||[]).forEach(x=>{
       if(!x||!x.id||delIds.has(x.id))return;
       if(map.has(x.id)){
-        /* 同 id：保留本地属性，history 取并集 */
+        /* 同 id：保留本地属性，history 深度合并取并集；createdAt 取两端较早者（避免本地较新 createdAt 截断连续天数） */
         const loc=map.get(x.id);
         const lh=loc.history||{}, rh=x.history||{};
         let merged=false;
         Object.keys(rh).forEach(d=>{ if(!(d in lh)){ lh[d]=rh[d]; merged=true; } });
-        if(merged)changed=true;
+        if(merged){ loc.history=lh; changed=true; } /* 关键回写：修「本地 history 为 undefined 时引用丢失」导致历史被清空 */
+        if(x.createdAt && (!loc.createdAt || x.createdAt<loc.createdAt)){ loc.createdAt=x.createdAt; changed=true; }
       }else{
         map.set(x.id,x);changed=true;
       }

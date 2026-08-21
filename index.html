@@ -1799,7 +1799,7 @@ function renderHeatmap(){
 function activityLevel(ds){
   let a=0;
   a+=S.todos.filter(x=>x.date===ds&&x.done).length;
-  a+=S.habits.filter(h=>h.history[ds]).length;
+  a+=S.habits.filter(h=>(h.history||{})[ds]).length;
   if(S.ledger.some(x=>x.date===ds))a+=1;
   if(S.moods[ds])a+=1;
   a+=S.worklog.filter(x=>x.date===ds).length;

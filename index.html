@@ -453,6 +453,11 @@ nav.tabbar a.on .ic{transform:scale(1.05)}
 .ln-notes-add:hover{background:var(--card-soft);color:var(--text);border-color:var(--text-3)}
 .ln-notes-hint{font-size:11px;color:var(--text-3);margin-top:6px;line-height:1.5}
 .ln-notes-empty-hint{font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.5;text-align:center;padding:8px}
+.ln-notes-symbols{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.ln-notes-sym-label{font-size:12px;color:var(--text-3);margin-right:4px}
+.ln-notes-sym-btn{border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:4px 10px;font-size:12px;color:var(--text-2);cursor:pointer;font-family:inherit}
+.ln-notes-sym-btn.on{background:var(--text);color:#fff;border-color:var(--text)}
+.ln-notes-sym-btn:hover{background:var(--card-hover)}
 .ln-close-confirm{position:absolute;inset:0;background:rgba(255,255,255,.96);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 .ln-close-confirm-box{text-align:center;width:100%}
 .ln-close-confirm-msg{font-weight:600;margin-bottom:18px;font-size:15px;color:var(--text)}
@@ -604,8 +609,12 @@ summary::-webkit-details-marker{color:var(--text)}
 .ln-caret{display:inline-block;width:16px;flex:none;color:var(--text-2);cursor:pointer;user-select:none;font-size:12px}
 .ln-caret:hover{color:var(--text)}
 .ln-caret-ph{display:inline-block;width:16px;flex:none}
-.ln-notes{display:none;width:100%;box-sizing:border-box}
+.ln-notes{display:none;width:100%;box-sizing:border-box;margin-top:6px}
 .ln-notes-open{display:block}
+.ln-note-block{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;background:var(--card-soft);border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:6px;font-size:13px;line-height:1.6;word-break:break-word}
+.ln-note-block:last-child{margin-bottom:0}
+.ln-note-sym{flex:none;min-width:28px;text-align:center;font-size:13px;color:var(--text-2);line-height:1.6;font-weight:600}
+.ln-note-text{flex:1;white-space:pre-wrap;word-break:break-word}
 .ln-notes-toggle{margin-top:6px;border:none;background:transparent;color:var(--text-2);font-size:12px;cursor:pointer;padding:0}
 .ln-notes-toggle:hover{color:var(--text)}
 .ln-seg{display:flex;gap:6px;margin:8px 0}
@@ -1072,6 +1081,7 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.16.2',date:'2026-08-24',modules:['学习'],items:['学习心得展示改为独立块：原本所有心得挤在一个浅灰框里、前面统一用 ·，现改为每条心得一个独立卡片块，视觉更清晰','学习心得支持选择编号符号：编辑弹窗新增「编号符号」选择器，可选 ①②③ / 1. 2. / 一、二 / · / • / - / (1) (2) 等 7 种，默认 ①②③；选择后编辑器和展示层同步生效','符号偏好随内容保存并云同步：新增 `notesSymbol` 字段，已加入 `mergeItemsFields` 字段级合并，跨设备同步不会丢失'],status:'已上线'},
   {version:'v3.16.1',date:'2026-08-24',modules:['学习'],items:['学习心得展示框宽度优化：心得体从 .ln-main 内部移出，作为卡片级元素平铺，宽度与外层学习卡片内容区保持一致（仅比卡片外框窄一个内边距），修复手机端/电脑端两侧大片空白的问题'],status:'已上线'},
   {version:'v3.16',date:'2026-08-24',modules:['云同步'],items:['云同步升级为多账户（profiles）架构：支持新增/命名/切换不同 Gist ID 的同步账户，每个账户独立保存 Gist ID 与 Token','切换账户需输入该账户的 Passcode，实现「登录」效果；Passcode 不持久化于本机，每次打开需重新登录，账户配置（名称/Gist ID/Token）保留无需重复填写','账户管理页支持：账户列表与当前标识、一键切换、新增账户、删除账户（仅移除本机配置，不删 GitHub Gist）、立即同步、历史版本恢复、复制 Gist ID、退出登录','内置默认账户（默认云库）硬编码 Gist ID 与 Token，新设备/清缓存后只需输入 Passcode 即可自动连接，无需重新配置','首次登录自动把本地 salt 对齐云端，保证推送/拉取密钥一致，跨设备往返不丢数据','旧版单配置自动迁移为多账户（保留 Gist ID/Token，Passcode 改为登录时输入）'],status:'已上线'},
   {version:'v3.15',date:'2026-08-21',modules:['学习'],items:['学习心得支持多行录入：单一文本框改为多行编辑器，每条心得独立成行，左侧自动 ① ② ③… 编号（最多 20 条，超出显示 [21]），下方 + 新增心得、× 删除单条；存储改为 \u0001 分隔，老数据按 \n 拆分并自动剥离 ① / 1. / · / • 等旧前缀做迁移','学习心得在节点详情/资源列表的展示同步改为每条一行 + · 前缀，与录入对齐','内容/资源弹窗加宽：.modal.wide 从 460px → 640px，更适合多行编辑器','弹窗新增可拖拽调整大小：右下角 ↘ 把手拖动改宽高（最小 360×240，最大 95vw×95vh），尺寸按 wide/xl 分类持久化到 localStorage，刷新保留'],status:'已上线'},
@@ -1217,7 +1227,20 @@ function setupResizable(){
 /* —— v3.15 学习心得多行编辑器 —— */
 /* 拆分旧/新格式：旧用 \n 拆（自动剥前缀序号），新用 \u0001 分隔，一行 = 一条心得 */
 const _lnOrdinals='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+const _lnChineseNums='一二三四五六七八九十十一十二十三十四十五十六十七十八十九二十'.split('');
 const _lnOrdinalRe=/^\s*(?:[①-㊿]|\d+[.、)]?\s*|[·•\-]\s*)/;
+const _lnDefaultSymbol='circle';
+const _lnNoteSymbols={
+  circle:{name:'①②③', fmt:i=>_lnOrdinals[i]||('['+(i+1)+']')},
+  number:{name:'1. 2.', fmt:i=>(i+1)+'.'},
+  chinese:{name:'一、二', fmt:i=>_lnChineseNums[i]||('['+(i+1)+']')},
+  dot:{name:'· ·', fmt:()=>'·'},
+  bullet:{name:'• •', fmt:()=>'•'},
+  dash:{name:'- -', fmt:()=>'-'},
+  paren:{name:'(1) (2)', fmt:i=>'('+(i+1)+')'}
+};
+let _lnCurrentSymbol=_lnDefaultSymbol;
+function lnNoteSymbolHtml(sym,i){const s=_lnNoteSymbols[sym]||_lnNoteSymbols[_lnDefaultSymbol];return s.fmt(i);}
 function stripOrdinal(s){return String(s||'').replace(_lnOrdinalRe,'').trim();}
 function parseNotesEntries(s){
   if(!s)return [''];
@@ -1239,26 +1262,34 @@ function serializeNotesEntries(){
   const arr=$$('#lnCtNotesList textarea').map(t=>String(t.value||'').replace(/\u0001/g,'\n').trim()).filter(t=>t.length);
   return arr.join('\u0001');
 }
-function lnNotesNumHtml(i){return _lnOrdinals[i]||('['+(i+1)+']');}
-function lnNotesEditorHtml(rawNotes){
+function lnNotesNumHtml(i,sym){return lnNoteSymbolHtml(sym||_lnDefaultSymbol,i);}
+function lnNotesEditorHtml(rawNotes,symbol){
+  const sym=symbol||_lnDefaultSymbol;
+  _lnCurrentSymbol=sym;
   const entries=parseNotesEntries(rawNotes);
-  const rows=entries.map((t,i)=>`<div class="ln-notes-row"><div class="ln-notes-num">${lnNotesNumHtml(i)}</div><textarea data-i="${i}" placeholder="心得/示例/注意点…（同一行内可回车换行）">${esc(t)}</textarea><button type="button" class="ln-notes-del" data-i="${i}" title="删除此条">×</button></div>`).join('');
-  return `<div class="ln-notes-rows" id="lnCtNotesList">${rows}</div><div style="display:flex;gap:8px;align-items:center;margin-top:8px"><button type="button" class="ln-notes-add" onclick="lnNotesAddRow()">+ 新增心得</button><span class="ln-notes-hint">每条独立成行；点 + 新增、点 × 删除</span></div>`;
+  const rows=entries.map((t,i)=>`<div class="ln-notes-row"><div class="ln-notes-num">${lnNotesNumHtml(i,sym)}</div><textarea data-i="${i}" placeholder="心得/示例/注意点…（同一行内可回车换行）">${esc(t)}</textarea><button type="button" class="ln-notes-del" data-i="${i}" title="删除此条">×</button></div>`).join('');
+  const symSelector=`<div class="ln-notes-symbols"><span class="ln-notes-sym-label">编号符号</span>${Object.keys(_lnNoteSymbols).map(k=>`<button type="button" class="ln-notes-sym-btn${k===sym?' on':''}" data-sym="${k}" onclick="lnNotesSetSymbol('${k}')">${_lnNoteSymbols[k].name}</button>`).join('')}</div>`;
+  return `${symSelector}<div class="ln-notes-rows" id="lnCtNotesList">${rows}</div><div style="display:flex;gap:8px;align-items:center;margin-top:8px"><button type="button" class="ln-notes-add" onclick="lnNotesAddRow()">+ 新增心得</button><span class="ln-notes-hint">每条独立成行；点 + 新增、点 × 删除</span></div>`;
 }
 function lnNotesAddRow(){
   const list=document.getElementById('lnCtNotesList');if(!list)return;
   const i=list.children.length;
   const div=document.createElement('div');
   div.className='ln-notes-row';
-  div.innerHTML=`<div class="ln-notes-num">${lnNotesNumHtml(i)}</div><textarea data-i="${i}" placeholder="心得/示例/注意点…"></textarea><button type="button" class="ln-notes-del" data-i="${i}" title="删除此条">×</button>`;
+  div.innerHTML=`<div class="ln-notes-num">${lnNotesNumHtml(i,_lnCurrentSymbol)}</div><textarea data-i="${i}" placeholder="心得/示例/注意点…"></textarea><button type="button" class="ln-notes-del" data-i="${i}" title="删除此条">×</button>`;
   list.appendChild(div);
   renumberNotesRows();
   div.querySelector('textarea').focus();
 }
+function lnNotesSetSymbol(sym){
+  _lnCurrentSymbol=sym||_lnDefaultSymbol;
+  $$('.ln-notes-sym-btn').forEach(b=>b.classList.toggle('on',b.dataset.sym===_lnCurrentSymbol));
+  renumberNotesRows();
+}
 function renumberNotesRows(){
   const list=document.getElementById('lnCtNotesList');if(!list)return;
   $$('#lnCtNotesList .ln-notes-row').forEach((row,i)=>{
-    row.querySelector('.ln-notes-num').textContent=lnNotesNumHtml(i);
+    row.querySelector('.ln-notes-num').textContent=lnNotesNumHtml(i,_lnCurrentSymbol);
     row.querySelector('textarea').dataset.i=i;
     row.querySelector('.ln-notes-del').dataset.i=i;
   });
@@ -2668,7 +2699,7 @@ function mergeState(remote){
     });
     /* 字段级深度合并（同 id 时远端非空字段覆盖本地）—— 修复学习心得/答案/详情等不同步
        plans 嵌套复杂（milestones>tasks），保留 unionArr 即可 */
-    mergeItemsFields(S.learning.contents,remote.learning.contents,['name','kind','note','notes','url','directionId','nodeId','parentId']);
+    mergeItemsFields(S.learning.contents,remote.learning.contents,['name','kind','note','notes','notesSymbol','url','directionId','nodeId','parentId']);
     mergeItemsFields(S.learning.questions,remote.learning.questions,['title','detail','status','answer','tags','hard','solvedAt','directionId','contentId','nodeId']);
     mergeItemsFields(S.learning.directions,remote.learning.directions,['name','description','active','color']);
     mergeItemsFields(S.learning.reviews,remote.learning.reviews,['refType','refId','directionId','nodeId','due','done','note']);
@@ -3803,8 +3834,9 @@ function lnNotesHtml(c,mode){
   if(!c.notes||!c.notes.trim())return '';
   const entries=parseNotesEntries(c.notes).filter(t=>t.length);
   if(!entries.length)return '';
-  const body=entries.map(t=>`<div style="display:flex;gap:6px;align-items:flex-start;margin:3px 0"><span style="color:var(--text-3);flex:none;line-height:1.7">·</span><span style="flex:1;white-space:pre-wrap;word-break:break-word">${esc(t)}</span></div>`).join('');
-  return `<div class="ln-notes${lnNoteExpanded[c.id]?' ln-notes-open':''}" style="margin-top:6px;padding:10px 12px;background:var(--card-soft);border-radius:var(--r-sm);border:1px solid var(--line);font-size:13px;line-height:1.6;word-break:break-word">${body}</div>${mode!=='compact'?`<button class="ln-notes-toggle" onclick="lnToggleNotes('${c.id}')">${lnNoteExpanded[c.id]?'收起心得':'展开心得'}</button>`:''}`;
+  const sym=c.notesSymbol||_lnDefaultSymbol;
+  const blocks=entries.map((t,i)=>`<div class="ln-note-block"><span class="ln-note-sym">${lnNoteSymbolHtml(sym,i)}</span><span class="ln-note-text">${esc(t)}</span></div>`).join('');
+  return `<div class="ln-notes${lnNoteExpanded[c.id]?' ln-notes-open':''}">${blocks}</div>${mode!=='compact'?`<button class="ln-notes-toggle" onclick="lnToggleNotes('${c.id}')">${lnNoteExpanded[c.id]?'收起心得':'展开心得'}</button>`:''}`;
 }
 function lnQuickAddChild(dirId,parentId){ const L0=lnData(); const p=L0.contents.find(c=>c.id===parentId); openLnContentModal(p?p.directionId:dirId,null,null,parentId); }
 function lnContentListHtml(L0,dirId,parentId,depth){
@@ -3890,7 +3922,7 @@ function openLnContentModal(dirId,id,nodeId,parentId){
     <div class="field"><span class="lab">名称</span><input id="lnCtName" value="${c?esc(c.name):''}" placeholder="如《流畅的Python》/ 基础语法"></div>
     <div class="field"><span class="lab">链接</span><input id="lnCtUrl" value="${c?esc(c.url||''):''}" placeholder="选填，资料链接"></div>
     <div class="field"><span class="lab">备注</span><input id="lnCtNote" value="${c?esc(c.note||''):''}" placeholder="一句话备注"></div>
-    <div class="field" style="flex-direction:column;align-items:stretch"><span class="lab" style="margin-top:4px">学习心得</span>${lnNotesEditorHtml(c?c.notes||'':'')}</div>
+    <div class="field" style="flex-direction:column;align-items:stretch"><span class="lab" style="margin-top:4px">学习心得</span>${lnNotesEditorHtml(c?c.notes||'':'',c?c.notesSymbol:'')}</div>
     <div class="btns"><button class="cancel" onclick="lnConfirmClose(()=>{$('#lnCtSave').click()})">关闭</button><button class="ok" id="lnCtSave">保存</button></div>`,{noMaskClose:true});
   $('#modalBox').classList.add('wide');
   bindNotesDelBtns();
@@ -3899,7 +3931,7 @@ function openLnContentModal(dirId,id,nodeId,parentId){
   $('#lnCtDir').onchange=e=>{const did=e.target.value;$('#lnCtNode').innerHTML=lnNodeOptions(L0,did).map(o=>`<option value="${o.value}">${esc(o.label)}</option>`).join('');$('#lnCtParent').innerHTML=parentOptsHtml(did,id,$('#lnCtParent').value)};
   function lnContentCommit(){
     const name=$('#lnCtName').value.trim();if(!name){toast('请填写名称');return false}
-    const obj={name,directionId:$('#lnCtDir').value||null,kind:k,url:$('#lnCtUrl').value.trim(),note:$('#lnCtNote').value.trim(),notes:serializeNotesEntries(),nodeId:$('#lnCtNode').value||null,parentId:$('#lnCtParent').value||null};
+    const obj={name,directionId:$('#lnCtDir').value||null,kind:k,url:$('#lnCtUrl').value.trim(),note:$('#lnCtNote').value.trim(),notes:serializeNotesEntries(),notesSymbol:_lnCurrentSymbol,nodeId:$('#lnCtNode').value||null,parentId:$('#lnCtParent').value||null};
     if(c){Object.assign(c,obj);}else{L0.contents.unshift(Object.assign({id:uid(),createdAt:todayStr(),notes:''},obj));}
     persist();lnRefresh();
     return true;

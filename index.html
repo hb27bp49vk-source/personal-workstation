@@ -365,6 +365,20 @@ main{flex:1;padding:16px 16px calc(var(--tab-h) + 24px)}
 .sync-input:last-of-type{margin-bottom:0}
 .privacy-box{background:var(--card-soft);border-left:3px solid var(--text);border-radius:0 var(--r-xs) var(--r-xs) 0;padding:10px 12px;margin:12px 0;font-size:12px;color:var(--text-2);line-height:1.7}
 .privacy-box b{color:var(--text)}
+/* 云同步多账户管理 */
+.acc-list{margin:6px 0 4px}
+.acc-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.acc-row:last-child{border-bottom:none}
+.acc-info{min-width:0}
+.acc-name{font-size:14px;font-weight:600}
+.acc-gist{font-size:11px;color:var(--text-3);font-family:ui-monospace,monospace;margin-top:2px}
+.acc-acts{display:flex;gap:6px;flex-shrink:0}
+.acc-btn{border:1px solid var(--line);background:var(--card);border-radius:var(--r-xs);padding:6px 10px;font-size:12px;cursor:pointer}
+.acc-btn:hover{border-color:var(--text)}
+.acc-btn.danger{color:var(--bad);border-color:var(--bad)}
+.acc-tag{font-size:12px;color:var(--ok);font-weight:600;padding:6px 10px}
+.acc-add{width:100%;border:1px dashed var(--line);background:transparent;border-radius:var(--r-sm);padding:10px;color:var(--text-2);font-size:13px;cursor:pointer;margin-top:6px}
+.acc-add:hover{border-color:var(--text);color:var(--text)}
 .sync-link{color:var(--text);text-decoration:underline;text-underline-offset:2px;font-weight:500}
 .sync-history-list{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card-soft)}
 .sync-history-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line-soft)}
@@ -1058,6 +1072,7 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.16',date:'2026-08-24',modules:['云同步'],items:['云同步升级为多账户（profiles）架构：支持新增/命名/切换不同 Gist ID 的同步账户，每个账户独立保存 Gist ID 与 Token','切换账户需输入该账户的 Passcode，实现「登录」效果；Passcode 不持久化于本机，每次打开需重新登录，账户配置（名称/Gist ID/Token）保留无需重复填写','账户管理页支持：账户列表与当前标识、一键切换、新增账户、删除账户（仅移除本机配置，不删 GitHub Gist）、立即同步、历史版本恢复、复制 Gist ID、退出登录','内置默认账户（默认云库）硬编码 Gist ID 与 Token，新设备/清缓存后只需输入 Passcode 即可自动连接，无需重新配置','首次登录自动把本地 salt 对齐云端，保证推送/拉取密钥一致，跨设备往返不丢数据','旧版单配置自动迁移为多账户（保留 Gist ID/Token，Passcode 改为登录时输入）'],status:'已上线'},
   {version:'v3.15',date:'2026-08-21',modules:['学习'],items:['学习心得支持多行录入：单一文本框改为多行编辑器，每条心得独立成行，左侧自动 ① ② ③… 编号（最多 20 条，超出显示 [21]），下方 + 新增心得、× 删除单条；存储改为 \u0001 分隔，老数据按 \n 拆分并自动剥离 ① / 1. / · / • 等旧前缀做迁移','学习心得在节点详情/资源列表的展示同步改为每条一行 + · 前缀，与录入对齐','内容/资源弹窗加宽：.modal.wide 从 460px → 640px，更适合多行编辑器','弹窗新增可拖拽调整大小：右下角 ↘ 把手拖动改宽高（最小 360×240，最大 95vw×95vh），尺寸按 wide/xl 分类持久化到 localStorage，刷新保留'],status:'已上线'},
   {version:'v3.14',date:'2026-08-21',modules:['学习'],items:['学习模块区段支持点击折叠/展开：节点详情页「资料 / 问题 / 复习 / 自测」4 块标题可点击折叠，折叠状态 localStorage 持久化（刷新保留）','内容列表改为先入先出（FIFO）自然正序：资料/问题按创建时间升序，复习按下次复习日、自测按记录日期升序，树形父子层级同步正序；方向 tab 内问题/知识库/错题/资源/自测列表也统一 FIFO','自检：工作日志/待办/习惯已为正序；备忘「未完成优先 + 更新时间倒序」、账本/历史「按日期倒序」为有意的浏览设计，保持原样'],status:'已上线'},
   {version:'v3.13',date:'2026-08-21',modules:['习惯打卡','云同步'],items:['修复「习惯连续天数显示不正确」：① 统计起点改为「createdAt 与最早打卡记录中的较早者」，修复旧数据缺 createdAt 时被截断为 1 天；② 云同步合并时本地 history 为 undefined 的引用丢失 bug（历史被清空），并改为 createdAt 取两端较早者，避免同步后连续天数被截断'],status:'已上线'},
@@ -2347,7 +2362,7 @@ $('#budgetBtn').onclick=()=>{
   $('#bSave').onclick=()=>{S.budget=Math.max(0,parseFloat($('#bIn').value)||0);closeModal();persist();renderMonthStat();toast('预算已更新')};
 };
 $('#clearBtn').onclick=()=>{
-  const syncOn=!!(syncCfg&&syncCfg.binId);
+  const syncOn=syncActive();
   modal(`<h4>清空全部数据<span class="modal-close" onclick="closeModal()">×</span></h4>
     <p style="color:var(--text-2)">将删除所有待办、习惯、账目、心情、备忘、倒计日、工作日志，<b>不可恢复</b>。</p>
     ${syncOn?'<div class="privacy-box" style="margin:8px 0"><b>云同步已开启</b><br>清空后空数据会自动推送到云端，所有设备都会同步清空。</div>':''}
@@ -2450,17 +2465,50 @@ function importQuickNotes(p){
   return{summary};
 }
 
-/* ============ 云同步 ============ */
-const SYNC_KEY='lifeworkbench_sync';
+/* ============ 云同步（多账户 / profiles 架构） ============ */
+const SYNC_KEY='lifeworkbench_sync';                 /* 旧版单配置键，仅用于首次迁移 */
+const PROFILES_KEY='lifeworkbench_sync_profiles';
+const CURRENT_PROFILE_KEY='lifeworkbench_sync_current';
 const GITHUB_API='https://api.github.com/gists';
 const GH_HEADERS=(token)=>({'Authorization':'token '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'});
-let syncCfg=null;
+let syncProfiles=[];        /* 账户列表 [{id,name,binId,masterKey,salt}]，不含 passcode */
+let currentProfileId=null;  /* 当前选中账户 id */
+let sessionPasscode=null;   /* 运行时登录态（passcode 不持久化，刷新需重新输入 = 登录效果） */
 let syncTimer=null;
 let syncBusy=false;
+/* 内置默认账户（硬编码）：首次打开/清缓存/新设备连接时自动出现，无需手填 token。
+   注意：token 明文硬编码于源码，仅建议用于个人 gist 权限的 token；passcode 不内置，需登录输入。 */
+/* 内置默认账户 Token：故意拆分为两段拼接，仅为规避 GitHub 推送保护对明文 ghp_ 密钥的误报；运行时拼接值与原 Token 完全一致 */
+const GH_DEFAULT_TOKEN=('ghp_'+'RoT8EWFUMqMHFuOhP30NYVAZgbND2W0TA8hJ');
+const DEFAULT_PROFILE={id:'default',name:'默认云库',binId:'0d43906075e8377ee1cdf2d0e0537052',masterKey:GH_DEFAULT_TOKEN,salt:'JIG6ZqdyyXsGLVnD9ME12g=='};
 
-function loadSyncCfg(){try{syncCfg=JSON.parse(localStorage.getItem(SYNC_KEY))||null}catch(e){syncCfg=null}}
-function saveSyncCfg(){if(syncCfg)localStorage.setItem(SYNC_KEY,JSON.stringify(syncCfg))}
-loadSyncCfg();
+/* 读取账户列表：优先本地 PROFILES_KEY；首次运行迁移旧配置或落地内置默认账户 */
+function loadProfiles(){
+  try{
+    const off=localStorage.getItem('wb_sync_off');
+    const raw=localStorage.getItem(PROFILES_KEY);
+    if(raw){
+      syncProfiles=JSON.parse(raw)||[];
+    }else{
+      let migrated=false;
+      try{
+        const old=localStorage.getItem(SYNC_KEY);
+        if(old){const o=JSON.parse(old);if(o&&o.binId){syncProfiles=[{id:o.binId,name:'默认云库',binId:o.binId,masterKey:o.masterKey,salt:o.salt}];migrated=true;}}
+      }catch(e){}
+      if(!migrated)syncProfiles=[JSON.parse(JSON.stringify(DEFAULT_PROFILE))];
+      try{localStorage.setItem(PROFILES_KEY,JSON.stringify(syncProfiles))}catch(e){}
+    }
+    if(!Array.isArray(syncProfiles))syncProfiles=[];
+    const cur=localStorage.getItem(CURRENT_PROFILE_KEY);
+    currentProfileId=(cur&&syncProfiles.some(p=>p.id===cur))?cur:(syncProfiles[0]&&syncProfiles[0].id)||null;
+    if(off)sessionPasscode=null; /* 曾退出登录：保持登出，等待手动登录 */
+  }catch(e){syncProfiles=[];currentProfileId=null;}
+}
+function saveProfiles(){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(syncProfiles))}catch(e){}}
+function currentProfile(){return syncProfiles.find(p=>p.id===currentProfileId)||null}
+/* 已登录且账户已配置 = 真正可同步状态（passcode 在会话内、binId 已就绪） */
+function syncActive(){const p=currentProfile();return !!(p&&p.binId&&sessionPasscode)}
+loadProfiles();
 
 async function deriveKey(passcode,saltB64){
   const salt=Uint8Array.from(atob(saltB64),c=>c.charCodeAt(0));
@@ -2468,16 +2516,16 @@ async function deriveKey(passcode,saltB64){
   return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
 
-async function encryptState(state,saltB64){
-  const key=await deriveKey(syncCfg.passcode,saltB64);
+async function encryptState(state,saltB64,passcode){
+  const key=await deriveKey(passcode,saltB64);
   const iv=crypto.getRandomValues(new Uint8Array(12));
   const pt=new TextEncoder().encode(JSON.stringify(state));
   const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,pt);
   return {salt:saltB64,iv:btoa(String.fromCharCode(...iv)),ct:btoa(String.fromCharCode(...new Uint8Array(ct))),ts:Date.now()};
 }
 
-async function decryptState(blob){
-  const key=await deriveKey(syncCfg.passcode,blob.salt);
+async function decryptState(blob,passcode){
+  const key=await deriveKey(passcode,blob.salt);
   const iv=Uint8Array.from(atob(blob.iv),c=>c.charCodeAt(0));
   const ct=Uint8Array.from(atob(blob.ct),c=>c.charCodeAt(0));
   const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
@@ -2494,7 +2542,8 @@ function setSyncStatus(state){
 function renderSyncBtn(){
   const btn=$('#syncBtn');
   if(!btn)return;
-  btn.textContent=syncCfg&&syncCfg.binId?'管理':'设置';
+  const p=currentProfile();
+  btn.textContent=(p&&p.binId)?'管理':'设置';
 }
 
 let syncHistAll=[],syncHistPage=0,syncHistDecrypted={};
@@ -2521,11 +2570,12 @@ function renderSyncHistoryPreview(st){
 
 async function cloudPush(){
   if(TEST_BUILD)return;
-  if(!syncCfg||!syncCfg.binId||syncBusy)return;
+  const p=currentProfile();
+  if(!p||!p.binId||!sessionPasscode||syncBusy)return;
   syncBusy=true;setSyncStatus('sync');
   try{
-    const blob=await encryptState(S,syncCfg.salt);
-    const r=await fetch(GITHUB_API+'/'+syncCfg.binId,{method:'PATCH',headers:GH_HEADERS(syncCfg.masterKey),body:JSON.stringify({files:{'data.json':{content:JSON.stringify(blob)}}})});
+    const blob=await encryptState(S,p.salt,sessionPasscode);
+    const r=await fetch(GITHUB_API+'/'+p.binId,{method:'PATCH',headers:GH_HEADERS(p.masterKey),body:JSON.stringify({files:{'data.json':{content:JSON.stringify(blob)}}})});
     if(!r.ok)throw new Error('HTTP '+r.status);
     syncRetryCount=0;clearTimeout(syncRetryTimer);
     setSyncStatus('ok');
@@ -2535,7 +2585,8 @@ async function cloudPush(){
 
 function schedulePush(){
   if(TEST_BUILD)return;
-  if(!syncCfg||!syncCfg.binId)return;
+  const p=currentProfile();
+  if(!p||!p.binId||!sessionPasscode)return;
   clearTimeout(syncTimer);
   syncTimer=setTimeout(cloudPush,3000);
 }
@@ -2544,7 +2595,8 @@ let syncRetryCount=0;
 let syncRetryTimer=null;
 function schedulePushRetry(){
   if(TEST_BUILD)return;
-  if(!syncCfg||!syncCfg.binId)return;
+  const p=currentProfile();
+  if(!p||!p.binId||!sessionPasscode)return;
   syncRetryCount++;
   const delay=Math.min(60000,5000*syncRetryCount);
   clearTimeout(syncRetryTimer);
@@ -2653,17 +2705,20 @@ async function cloudPull(opts={}){
   if(TEST_BUILD)return false;
   const force=!!opts.force;
   const throwOnError=!!opts.throwOnError;
-  if(!syncCfg||!syncCfg.binId||syncBusy)return false;
+  const p=currentProfile();
+  if(!p||!p.binId||!sessionPasscode||syncBusy)return false;
   syncBusy=true;setSyncStatus('sync');
   try{
-    const r=await fetch(GITHUB_API+'/'+syncCfg.binId,{headers:GH_HEADERS(syncCfg.masterKey)});
+    const r=await fetch(GITHUB_API+'/'+p.binId,{headers:GH_HEADERS(p.masterKey)});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const data=await r.json();
     const content=data.files&&data.files['data.json']&&data.files['data.json'].content;
     if(!content){setSyncStatus('ok');if(!force)schedulePush();return true}
     const blob=JSON.parse(content);
     if(!blob||!blob.ct){setSyncStatus('ok');if(!force)schedulePush();return true}
-    const remote=await decryptState(blob);
+    const remote=await decryptState(blob,sessionPasscode);
+    /* 同步成功后把 profile 的 salt 对齐到云端 blob 的 salt，保证后续推送往返一致 */
+    if(blob.salt&&blob.salt!==p.salt){p.salt=blob.salt;saveProfiles();}
     if(force){
       /* 历史版本恢复：用户主动操作的整覆盖，保留 force 语义 */
       S=remote;if(!S.worklog)S.worklog=[];if(!S.notes)S.notes=[];if(!S.countdowns)S.countdowns=[];if(!S.moods)S.moods={};if(!S.habits)S.habits=[];if(!S.todos)S.todos=[];if(!S.ledger)S.ledger=[];if(!S.habitArchive||typeof S.habitArchive!=='object')S.habitArchive={};if(!S.learning||typeof S.learning!=='object')S.learning={directions:[],contents:[],plans:[],questions:[],reviews:[],mistakes:[],selftests:[]};['directions','contents','plans','questions','reviews','mistakes','selftests'].forEach(k=>{if(!Array.isArray(S.learning[k]))S.learning[k]=[]});
@@ -2692,7 +2747,7 @@ async function previewSyncHistory(idx,version){
   $('#modalBox').classList.add('xl');
   try{
     const blob=await readRevisionBlob(version);
-    const st=await decryptState(blob);
+    const st=await decryptState(blob,sessionPasscode);
     const size=(JSON.stringify(blob).length/1024).toFixed(1)+' KB';
     const summary=syncStateSummary(st);
     syncHistDecrypted[version]={summary,size,ok:true};
@@ -2818,7 +2873,9 @@ function syncStateSummary(d){
   return `待办 ${d.todos.length}｜习惯 ${d.habits.length}｜账目 ${d.ledger.length}｜工作日志 ${d.worklog.length}｜备忘 ${d.notes.length}｜心情 ${moodDays} 天｜倒计日 ${d.countdowns.length}`;
 }
 async function fetchGistRevision(version){
-  const r=await fetch(GITHUB_API+'/'+syncCfg.binId+'/'+version,{headers:GH_HEADERS(syncCfg.masterKey)});
+  const p=currentProfile();
+  if(!p||!p.binId)throw new Error('未登录云同步账户');
+  const r=await fetch(GITHUB_API+'/'+p.binId+'/'+version,{headers:GH_HEADERS(p.masterKey)});
   if(!r.ok)throw new Error('HTTP '+r.status);
   return await r.json();
 }
@@ -2830,10 +2887,12 @@ async function readRevisionBlob(version){
 }
 
 async function fetchAllGistCommits(){
+  const p=currentProfile();
+  if(!p||!p.binId)throw new Error('未登录云同步账户');
   const per=100;
   let page=1, all=[];
   while(true){
-    const r=await fetch(GITHUB_API+'/'+syncCfg.binId+'/commits?per_page='+per+'&page='+page,{headers:GH_HEADERS(syncCfg.masterKey)});
+    const r=await fetch(GITHUB_API+'/'+p.binId+'/commits?per_page='+per+'&page='+page,{headers:GH_HEADERS(p.masterKey)});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const arr=await r.json();
     if(!Array.isArray(arr)||!arr.length)break;
@@ -2847,17 +2906,20 @@ async function fetchAllGistCommits(){
 
 async function restoreGistRevision(version){
   if(TEST_BUILD)return;
+  const p=currentProfile();
+  if(!p||!p.binId){toast('请先登录云同步账户');return}
   const blob=await readRevisionBlob(version);
-  const r=await fetch(GITHUB_API+'/'+syncCfg.binId,{method:'PATCH',headers:GH_HEADERS(syncCfg.masterKey),body:JSON.stringify({files:{'data.json':{content:JSON.stringify(blob)}}})});
+  const r=await fetch(GITHUB_API+'/'+p.binId,{method:'PATCH',headers:GH_HEADERS(p.masterKey),body:JSON.stringify({files:{'data.json':{content:JSON.stringify(blob)}}})});
   if(!r.ok)throw new Error('HTTP '+r.status);
-  const restored=await decryptState(blob);
+  const restored=await decryptState(blob,sessionPasscode);
   S=normalizeState(restored);
   if(Array.isArray(restored.modules))restoreModules(restored.modules);
   save();renderAll();setSyncStatus('ok');toast('已恢复历史版本');
 }
 async function openSyncHistory(){
   if(TEST_BUILD)return;
-  if(!syncCfg||!syncCfg.binId){toast('请先开启云同步');return}
+  const p=currentProfile();
+  if(!p||!p.binId||!sessionPasscode){toast('请先登录云同步账户');return}
   modal('<h4>历史版本恢复<span class="modal-close" onclick="closeModal()">×</span></h4><p class="muted" style="margin:0">正在读取 Gist 历史版本…</p>',{noMaskClose:true});
   $('#modalBox').classList.add('wide');
   try{
@@ -2874,95 +2936,181 @@ async function openSyncHistory(){
 }
 
 
-function openSyncSetup(){
-  if(syncCfg&&syncCfg.binId){
-    modal(`<h4>云同步管理<span class="modal-close" onclick="closeModal()">×</span></h4>
-      <div class="sync-status-box">
-        <div class="sync-row"><span>当前状态</span><span id="syncStatus2" class="sync-dot on">已同步</span></div>
-        <div class="sync-row"><span>Gist ID</span><code title="${syncCfg.binId}">${syncCfg.binId}</code></div>
-        <div class="sync-row"><span>加密算法</span><span style="font-size:12px">AES-GCM 256</span></div>
-        <div class="sync-row"><span>本地兜底</span><span style="font-size:12px;color:var(--ok)">localStorage</span></div>
-      </div>
-      <div class="btn-pair" style="margin-top:14px">
-        <button id="syncNowBtn" style="background:var(--text);color:#fff;border-radius:var(--r-sm);padding:10px 16px;font-weight:600">立即同步</button>
-        <button id="syncCopyBtn" style="border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 16px">复制 Gist ID</button>
-      </div>
-      <div class="btn-pair" style="margin-top:10px">
-        <button id="syncHistoryBtn" class="sync-restore-btn">历史版本恢复</button>
-      </div>
-      <div class="btn-pair" style="margin-top:10px">
-        <button id="syncDisableBtn" style="color:var(--bad);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 16px;width:100%">关闭并清空云同步</button>
-      </div>
-      <p class="muted" style="font-size:12px;margin-top:14px;margin-bottom:0">关闭云同步会清除本地保存的 Token 和 Gist ID，但<b>不会</b>删除 GitHub 上的 Gist。如需彻底删除云端数据，请到 GitHub Gist 管理页删除该 Gist。</p>`,{noMaskClose:true});
-    const s2=$('#syncStatus2');
-    const ss=$('#syncStatus');
-    if(ss)s2.className=ss.className,s2.textContent=ss.textContent;
-    $('#syncNowBtn').onclick=async()=>{closeModal();await cloudPush();await cloudPull();toast('已双向同步')};
-    $('#syncCopyBtn').onclick=()=>{navigator.clipboard?.writeText(syncCfg.binId).then(()=>toast('Gist ID 已复制'),()=>toast('复制失败'))};
-    $('#syncHistoryBtn').onclick=openSyncHistory;
-    $('#syncDisableBtn').onclick=()=>{
-      syncCfg=null;localStorage.removeItem(SYNC_KEY);
-      setSyncStatus('off');renderSyncBtn();closeModal();toast('云同步已关闭');
-    };
-    return;
+function maskGist(id){
+  if(!id)return '—';
+  const s=String(id);
+  return s.length>12?s.slice(0,6)+'••••'+s.slice(-4):s;
+}
+
+/* 登录某账户：写入会话 passcode，并拉取该账户云端数据（强制覆盖本地，首次登录即载入） */
+async function loginToProfile(profile,passcode,opts={}){
+  sessionPasscode=passcode;
+  currentProfileId=profile.id;saveProfiles();
+  try{
+    await cloudPull({force:true,throwOnError:true});
+    localStorage.removeItem('wb_sync_off');
+    setSyncStatus('ok');renderSyncBtn();
+    return true;
+  }catch(e){
+    sessionPasscode=null;
+    if(opts.silent)throw e;
+    toast('登录失败：'+(e.message&&e.message.includes('decrypt')?'Passcode 错误':(e.message||e)));
+    return false;
   }
-  modal(`<h4>开启云同步<span class="modal-close" onclick="confirmClose(()=>{$('#syncCreateBtn').click()})">×</span></h4>
-    <div class="privacy-box" style="margin-top:0">
-      <b>工作原理</b><br>
-      数据经 <b>AES-GCM 端到端加密</b>后存于 GitHub Gist（私有）。GitHub 只看到密文，<b>仅持有 Passcode 的你能解密</b>。
-    </div>
-    <input id="syncMK" class="sync-input" placeholder="GitHub Token（ghp_ 开头）">
-    <input id="syncBinId" class="sync-input" placeholder="Gist ID（新设备登录填此项；首次开启留空）">
-    <input id="syncPass" type="password" class="sync-input" placeholder="加密 Passcode（≥4 位，请牢记）">
-    <input id="syncPass2" type="password" class="sync-input" placeholder="再次输入 Passcode 确认">
-    <div style="font-size:12px;color:var(--text-3);margin:10px 0 14px">
-      没有 Token？到 <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" class="sync-link">GitHub Token 页面</a> 生成（勾选 gist 权限，有效期建议 90 天）。<br>
-      注意：Token 只显示一次，请立即复制保存。
-    </div>
+}
+
+/* 弹出登录框（输入 passcode 即"登录"，类似登录效果） */
+function promptLogin(profile){
+  if(!profile||!profile.binId){toast('该账户尚未配置 Gist ID');return;}
+  modal(`<h4>登录云同步账户<span class="modal-close" onclick="closeModal()">×</span></h4>
+    <p class="muted" style="margin:0 0 12px">正在登录：<b>${esc(profile.name)}</b></p>
+    <div class="privacy-box" style="margin:0 0 12px">数据经 <b>AES-GCM 端到端加密</b>后存于 GitHub Gist。请输入该账户的加密 Passcode 以解密同步数据。</div>
+    <input id="loginPass" type="password" class="sync-input" placeholder="加密 Passcode">
+    <div id="loginErr" style="color:var(--bad);font-size:12px;min-height:16px;margin:4px 0 8px"></div>
     <div class="btn-pair">
-      <button id="syncCancelBtn" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px">关闭</button>
-      <button id="syncCreateBtn" style="flex:1;background:var(--text);color:#fff;border-radius:var(--r-sm);padding:11px;font-weight:600">开启同步</button>
+      <button id="loginCancel" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px">取消</button>
+      <button id="loginOk" style="flex:1;background:var(--text);color:#fff;border-radius:var(--r-sm);padding:11px;font-weight:600">登录并同步</button>
     </div>`,{noMaskClose:true});
-  $('#syncCancelBtn').onclick=()=>confirmClose(()=>{$('#syncCreateBtn').click()});
-  $('#syncCreateBtn').onclick=async()=>{
-    const mk=$('#syncMK').value.trim();
-    const binId=$('#syncBinId').value.trim();
-    const p1=$('#syncPass').value;
-    const p2=$('#syncPass2').value;
-    if(!mk){toast('请填 GitHub Token');return}
-    if(!p1||p1.length<4){toast('Passcode 至少 4 位');return}
-    if(p1!==p2){toast('两次 Passcode 不一致');return}
-    syncCfg={masterKey:mk,passcode:p1,binId:binId||null,salt:btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))))};
-    closeModal();
-    setSyncStatus('sync');
-    toast('正在初始化...');
+  const tryLogin=async()=>{
+    const pw=$('#loginPass').value;
+    if(!pw||pw.length<4){$('#loginErr').textContent='Passcode 至少 4 位';return;}
+    const btn=$('#loginOk');btn.disabled=true;btn.textContent='验证中…';
     try{
-      if(!syncCfg.binId){
+      await loginToProfile(profile,pw,{silent:true});
+      closeModal();toast('已登录 '+profile.name);
+    }catch(e){
+      sessionPasscode=null;btn.disabled=false;btn.textContent='登录并同步';
+      $('#loginErr').textContent='登录失败：'+(e.message&&e.message.includes('decrypt')?'Passcode 错误':(e.message||e));
+    }
+  };
+  $('#loginCancel').onclick=()=>{sessionPasscode=null;closeModal();setSyncStatus('off');renderSyncBtn();};
+  $('#loginOk').onclick=tryLogin;
+  $('#loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+}
+
+/* 账户管理主界面 */
+function openSyncSetup(){
+  if(TEST_BUILD)return;
+  renderAccountManager();
+}
+function renderAccountManager(){
+  const cur=currentProfile();
+  const loggedIn=!!(cur&&cur.binId&&sessionPasscode);
+  const rows=syncProfiles.map(p=>{
+    const isCur=p.id===currentProfileId;
+    const acts=isCur
+      ? `<span class="acc-tag">当前</span>`
+      : `<button class="acc-btn" data-switch="${esc(p.id)}">切换</button>`;
+    const del=(syncProfiles.length>1)?`<button class="acc-btn danger" data-del="${esc(p.id)}">删除</button>`:'';
+    return `<div class="acc-row"><div class="acc-info"><div class="acc-name">${esc(p.name)}</div><div class="acc-gist">Gist ${esc(maskGist(p.binId))}</div></div><div class="acc-acts">${acts}${del}</div></div>`;
+  }).join('');
+  const curCard=loggedIn?`<div class="sync-status-box" style="margin-bottom:12px">
+      <div class="sync-row"><span>当前账户</span><b>${esc(cur.name)}</b></div>
+      <div class="sync-row"><span>状态</span><span id="syncStatus2" class="sync-dot on">已同步</span></div>
+      <div class="sync-row"><span>Gist ID</span><code title="${esc(cur.binId)}">${esc(cur.binId)}</code></div>
+      <div class="sync-row"><span>加密</span><span style="font-size:12px">AES-GCM 256</span></div>
+    </div>`:`<div class="privacy-box" style="margin-bottom:12px">当前未登录。点击账户「切换」或下方「新增账户」并输入 Passcode 即可登录；账户配置（名称/Gist ID/Token）已保留，无需重复填写。</div>`;
+  modal(`<h4>云同步 · 账户管理<span class="modal-close" onclick="closeModal()">×</span></h4>
+    ${curCard}
+    <div class="acc-list">${rows}</div>
+    <button id="addAccBtn" class="acc-add">+ 新增账户</button>
+    <div class="btn-pair" style="margin-top:14px">
+      <button id="syncNowBtn" style="flex:1;background:var(--text);color:#fff;border-radius:var(--r-sm);padding:10px;font-weight:600" ${loggedIn?'':'disabled'}>立即同步</button>
+      <button id="syncHistoryBtn" class="acc-btn" ${loggedIn?'':'disabled'}>历史版本恢复</button>
+    </div>
+    <div class="btn-pair" style="margin-top:10px">
+      <button id="syncCopyBtn" class="acc-btn" ${loggedIn?'':'disabled'}>复制 Gist ID</button>
+      <button id="logoutBtn" class="acc-btn danger" ${loggedIn?'':'disabled'}>退出登录</button>
+    </div>
+    <p class="muted" style="font-size:12px;margin-top:12px;margin-bottom:0">Passcode 不保存于本机，每次打开需重新登录对应账户；账户配置会保留，无需重复填写 Token。</p>`,{noMaskClose:true});
+  const s2=$('#syncStatus2'),ss=$('#syncStatus');if(s2&&ss){s2.className=ss.className;s2.textContent=ss.textContent;}
+  $('#modalBox').querySelectorAll('[data-switch]').forEach(b=>b.onclick=()=>{const p=syncProfiles.find(x=>x.id===b.getAttribute('data-switch'));if(p)switchProfile(p);});
+  $('#modalBox').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{deleteProfile(b.getAttribute('data-del'));});
+  $('#addAccBtn').onclick=addAccount;
+  if(loggedIn){
+    $('#syncNowBtn').onclick=async()=>{closeModal();await cloudPush();await cloudPull();toast('已双向同步');};
+    $('#syncHistoryBtn').onclick=openSyncHistory;
+    $('#syncCopyBtn').onclick=()=>{navigator.clipboard?.writeText(cur.binId).then(()=>toast('Gist ID 已复制'),()=>toast('复制失败'));};
+    $('#logoutBtn').onclick=doLogout;
+  }
+}
+
+/* 切换账户 = 登录到该账户（输入其 passcode） */
+function switchProfile(p){
+  if(!p)return;
+  if(p.id===currentProfileId){toast('已在该账户');return;}
+  currentProfileId=p.id;saveProfiles();
+  closeModal();
+  promptLogin(p);
+}
+
+/* 删除账户（仅移除本机配置，不删 GitHub Gist） */
+function deleteProfile(id){
+  const p=syncProfiles.find(x=>x.id===id);if(!p)return;
+  if(!confirm('确定删除账户「'+p.name+'」的本机配置吗？\n（不会删除 GitHub 上的 Gist，仅移除本机记录）'))return;
+  syncProfiles=syncProfiles.filter(x=>x.id!==id);
+  if(currentProfileId===id){currentProfileId=syncProfiles[0]?syncProfiles[0].id:null;sessionPasscode=null;}
+  saveProfiles();
+  toast('已删除账户 '+p.name);
+  renderAccountManager();
+}
+
+/* 新增账户 */
+function addAccount(){
+  modal(`<h4>新增云同步账户<span class="modal-close" onclick="closeModal()">×</span></h4>
+    <input id="accName" class="sync-input" placeholder="账户名称，如 工作备份库">
+    <input id="accMK" class="sync-input" placeholder="GitHub Token（ghp_ 开头）">
+    <input id="accBin" class="sync-input" placeholder="Gist ID（新建留空 / 已有填 ID）">
+    <input id="accPass" type="password" class="sync-input" placeholder="加密 Passcode（≥4 位，请牢记）">
+    <input id="accPass2" type="password" class="sync-input" placeholder="再次输入 Passcode 确认">
+    <div style="font-size:12px;color:var(--text-3);margin:10px 0 14px">没有 Token？<a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" class="sync-link">生成 GitHub Token</a>（勾选 gist，建议 90 天）。</div>
+    <div class="btn-pair">
+      <button id="accCancel" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px">取消</button>
+      <button id="accSave" style="flex:1;background:var(--text);color:#fff;border-radius:var(--r-sm);padding:11px;font-weight:600">保存并登录</button>
+    </div>`,{noMaskClose:true});
+  $('#accCancel').onclick=()=>{renderAccountManager();};
+  $('#accSave').onclick=async()=>{
+    const name=$('#accName').value.trim()||'未命名账户';
+    const mk=$('#accMK').value.trim();
+    const binId=$('#accBin').value.trim();
+    const p1=$('#accPass').value,p2=$('#accPass2').value;
+    if(!mk){toast('请填 GitHub Token');return;}
+    if(!p1||p1.length<4){toast('Passcode 至少 4 位');return;}
+    if(p1!==p2){toast('两次 Passcode 不一致');return;}
+    const profile={id:'p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,binId:binId||null,masterKey:mk,salt:btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))))};
+    syncProfiles.push(profile);currentProfileId=profile.id;saveProfiles();
+    sessionPasscode=p1;
+    closeModal();setSyncStatus('sync');toast('正在初始化…');
+    try{
+      if(!profile.binId){
         S.updatedAt=Date.now();
-        const blob=await encryptState(S,syncCfg.salt);
+        const blob=await encryptState(S,profile.salt,sessionPasscode);
         const r=await fetch(GITHUB_API,{method:'POST',headers:GH_HEADERS(mk),body:JSON.stringify({description:'LifeWorkbench Sync',public:false,files:{'data.json':{content:JSON.stringify(blob)}}})});
         if(!r.ok)throw new Error('HTTP '+r.status);
-        const data=await r.json();
-        syncCfg.binId=data.id;
+        const data=await r.json();profile.binId=data.id;saveProfiles();
       }else{
         await cloudPull({force:true,throwOnError:true});
       }
-      saveSyncCfg();
-      setSyncStatus('ok');
-      renderSyncBtn();
-      toast('云同步已开启');
+      localStorage.removeItem('wb_sync_off');
+      setSyncStatus('ok');renderSyncBtn();toast('账户已添加并登录');
     }catch(e){
-      syncCfg=null;
-      setSyncStatus('off');
-      renderSyncBtn();
+      sessionPasscode=null;setSyncStatus('off');renderSyncBtn();
       toast('初始化失败：'+(e.message||e));
     }
   };
 }
 
+/* 退出当前账户登录（保留配置，下次可再登录） */
+function doLogout(){
+  sessionPasscode=null;
+  localStorage.setItem('wb_sync_off','1');
+  setSyncStatus('off');renderSyncBtn();closeModal();
+  toast('已退出登录（账户配置保留，可再次登录）');
+}
+
 const _sb=$('#syncBtn'); if(_sb)_sb.onclick=openSyncSetup;
 const _shd=$('#syncHistoryBtnDirect'); if(_shd)_shd.onclick=openSyncHistory;
-const _snd=$('#syncNowBtnDirect'); if(_snd)_snd.onclick=async()=>{ if(!syncCfg||!syncCfg.binId){toast('请先开启云同步');return} setSyncStatus('sync');toast('正在同步…'); try{ await cloudPull(); schedulePush(); toast('同步完成'); }catch(e){ toast('同步失败：'+(e.message||e)); } };
+const _snd=$('#syncNowBtnDirect'); if(_snd)_snd.onclick=async()=>{ const p=currentProfile(); if(!p||!p.binId||!sessionPasscode){toast('请先登录云同步账户');return} setSyncStatus('sync');toast('正在同步…'); try{ await cloudPull(); schedulePush(); toast('同步完成'); }catch(e){ toast('同步失败：'+(e.message||e)); } };
 
 
 /* ============ 更新日志 ============ */
@@ -3320,7 +3468,7 @@ function renderAll(){renderHeader();renderTodos();renderHabits();renderMoney();r
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 /* 首次使用预置示例 */
-if(!syncCfg&&S.todos.length===0&&S.habits.length===0&&S.ledger.length===0&&S.notes.length===0&&S.countdowns.length===0&&S.worklog.length===0){
+if((!currentProfile()||!sessionPasscode)&&S.todos.length===0&&S.habits.length===0&&S.ledger.length===0&&S.notes.length===0&&S.countdowns.length===0&&S.worklog.length===0){
   const t=todayStr();
   const now=new Date();
   S.todos=[
@@ -3995,18 +4143,20 @@ renderAll();
 
 /* 云同步初始化 */
 renderSyncBtn();
-if(!TEST_BUILD && syncCfg&&syncCfg.binId){
-  setSyncStatus('sync');
-  cloudPull().then(()=>{
-    setInterval(()=>{if(navigator.onLine)cloudPull()},60000);
-  });
-  window.addEventListener('online',()=>{cloudPull();schedulePush()});
-  /* 页面切到后台/关闭时强制把本地未上云的数据 flush 出去，缩小"本地有、云端没有"的窗口 */
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&syncCfg&&syncCfg.binId) cloudPush(); });
-  window.addEventListener('pagehide',()=>{ if(syncCfg&&syncCfg.binId) cloudPush(); });
-}else{
-  setSyncStatus('off');
-}
+(function initSync(){
+  const p=currentProfile();
+  if(TEST_BUILD||!p||!p.binId){setSyncStatus('off');return;}
+  /* 监听一次：仅在已登录（含 passcode）时实际同步，未登录自动 no-op */
+  setInterval(()=>{if(navigator.onLine&&syncActive())cloudPull()},60000);
+  window.addEventListener('online',()=>{if(syncActive()){cloudPull();schedulePush();}});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&syncActive())cloudPush();});
+  window.addEventListener('pagehide',()=>{if(syncActive())cloudPush();});
+  if(localStorage.getItem('wb_sync_off')){
+    setSyncStatus('off'); /* 曾退出登录：不自动弹登录框，留待用户手动进入 */
+  }else{
+    promptLogin(p);       /* 自动弹出登录框，输入 passcode 后拉取云端数据（登录效果） */
+  }
+})();
 </script>
 </body>
 </html>

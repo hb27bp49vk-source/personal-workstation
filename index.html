@@ -1083,6 +1083,11 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.17.3',date:'2026-08-25',modules:['账本'],items:[
+    '修复 v3.17.2 遗漏的 sticky 顶栏偏移：上一版滚到目标 sec 时卡片顶部紧贴视口 y=0，被 sticky 顶栏（高约 107px）完全遮住，导致「记一笔」输入框只露出下半部分。',
+    '修复方式：`scrollToTarget` 减去顶栏动态高度（`header.topbar.getBoundingClientRect().bottom`）再 -8px 间距，确保卡片完整露出在顶栏下方',
+    'E2E 验证（Playwright + 系统 Edge，390×844 iPhone 尺寸）：修复前 `rectTop=0 + visibleInViewport:false`，修复后 `rectTop=115 + visibleInViewport:true`；截图确认「记一笔」标题、金额、分类、备注、日期、保存按钮全部完整可见'
+  ],status:'已上线'},
   {version:'v3.17.2',date:'2026-08-25',modules:['账本'],items:[
     '修复「去记一笔」跳转后滚动不到位：先同步清零页面滚动，再经 80ms 精确滚动 + 400ms 兜底滚动双保险，并计入 sticky 顶栏偏移，确保「记一笔」卡片完整露出、不被遮挡',
     'tabbar 直接点账本仍保留上次浏览位置（v3.17.1 引入的行为不变），仅「去记一笔」按钮触发强制滚动'
@@ -1426,7 +1431,10 @@ $$('nav.tabbar a').forEach(a=>a.addEventListener('click',()=>{
     const scrollToTarget=(behavior)=>{
       const t=$(sel);if(!t)return;
       const rect=t.getBoundingClientRect();
-      const absTop=rect.top+window.scrollY;
+      /* 关键：减去 sticky 顶栏高度，否则卡片顶部被顶栏遮住（E2E 实测 rectTop=0 vs 顶栏底 107px） */
+      const hdr=document.querySelector('header.topbar');
+      const hdrBottom=hdr?hdr.getBoundingClientRect().bottom:0;
+      const absTop=rect.top+window.scrollY-Math.max(0,hdrBottom)-8;
       window.scrollTo({top:Math.max(0,absTop),behavior});
       if(!t.classList.contains('sec-flash')){t.classList.add('sec-flash');setTimeout(()=>t.classList.remove('sec-flash'),1300);}
     };

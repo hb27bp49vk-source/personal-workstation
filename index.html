@@ -1081,6 +1081,14 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.17',date:'2026-08-25',modules:['云同步'],items:[
+    '新增「记住本设备 N 天」免登录：登录云同步弹窗默认勾选 7 天，可改为 仅本次 / 3 天 / 30 天，到期自动失效、需重新输入 Passcode',
+    '本机用 AES-GCM 端到端加密 + 随机生成的 256-bit 设备密钥（首次启动落地一次）加密缓存 Passcode 到 localStorage，加密仅为本地遮挡、不联网',
+    '启动自动检查有效信任：未过期时无需输入 Passcode 即可解密云端、加载同步数据；过期/解密失败自动清除并退回登录框',
+    '「我的→云同步·账户管理」页增加「本机信任」行，显示已记住 X 天，一键「撤销信任」主动清理缓存',
+    '仅在该账户首次被信任时 toast 一次「已记住此设备 N 天，下次免输入」，避免重复登录反复打扰',
+    '明示安全权衡：信任期内本机 localStorage 内存在可解密的密文——设备物理共享或被装恶意扩展时存在风险，建议私人设备开启'
+  ],status:'已上线'},
   {version:'v3.16.2',date:'2026-08-24',modules:['学习'],items:['学习心得展示改为独立块：原本所有心得挤在一个浅灰框里、前面统一用 ·，现改为每条心得一个独立卡片块，视觉更清晰','学习心得支持选择编号符号：编辑弹窗新增「编号符号」选择器，可选 ①②③ / 1. 2. / 一、二 / · / • / - / (1) (2) 等 7 种，默认 ①②③；选择后编辑器和展示层同步生效','符号偏好随内容保存并云同步：新增 `notesSymbol` 字段，已加入 `mergeItemsFields` 字段级合并，跨设备同步不会丢失'],status:'已上线'},
   {version:'v3.16.1',date:'2026-08-24',modules:['学习'],items:['学习心得展示框宽度优化：心得体从 .ln-main 内部移出，作为卡片级元素平铺，宽度与外层学习卡片内容区保持一致（仅比卡片外框窄一个内边距），修复手机端/电脑端两侧大片空白的问题'],status:'已上线'},
   {version:'v3.16',date:'2026-08-24',modules:['云同步'],items:['云同步升级为多账户（profiles）架构：支持新增/命名/切换不同 Gist ID 的同步账户，每个账户独立保存 Gist ID 与 Token','切换账户需输入该账户的 Passcode，实现「登录」效果；Passcode 不持久化于本机，每次打开需重新登录，账户配置（名称/Gist ID/Token）保留无需重复填写','账户管理页支持：账户列表与当前标识、一键切换、新增账户、删除账户（仅移除本机配置，不删 GitHub Gist）、立即同步、历史版本恢复、复制 Gist ID、退出登录','内置默认账户（默认云库）硬编码 Gist ID 与 Token，新设备/清缓存后只需输入 Passcode 即可自动连接，无需重新配置','首次登录自动把本地 salt 对齐云端，保证推送/拉取密钥一致，跨设备往返不丢数据','旧版单配置自动迁移为多账户（保留 Gist ID/Token，Passcode 改为登录时输入）'],status:'已上线'},
@@ -2508,6 +2516,59 @@ let currentProfileId=null;  /* 当前选中账户 id */
 let sessionPasscode=null;   /* 运行时登录态（passcode 不持久化，刷新需重新输入 = 登录效果） */
 let syncTimer=null;
 let syncBusy=false;
+
+/* v3.17 信任本设备 N 天免登录：把 Passcode 用本机 device key 加密缓存到 localStorage */
+const DEVICE_KEY_NAME='wb_devkey_v1';
+const TRUST_STORE_NAME='wb_sync_trust_v1';
+const _TRUST_DAYS=[1,3,7,30];
+const _b64en=b=>{let s='';for(let i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s);};
+const _b64de=s=>{const bin=atob(s);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a;};
+function _ensureDevKey(){
+  let k=null;
+  try{const raw=localStorage.getItem(DEVICE_KEY_NAME);if(raw){const a=_b64de(raw);if(a&&a.length===32)k=a;}}catch(e){}
+  if(!k){k=crypto.getRandomValues(new Uint8Array(32));try{localStorage.setItem(DEVICE_KEY_NAME,_b64en(k));}catch(e){}}
+  return k;
+}
+async function _aesGcmEnc(keyBytes,plain){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ck=await crypto.subtle.importKey('raw',keyBytes,{name:'AES-GCM'},false,['encrypt']);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},ck,new TextEncoder().encode(plain));
+  return {ct:_b64en(new Uint8Array(ct)),iv:_b64en(iv)};
+}
+async function _aesGcmDec(keyBytes,ctB64,ivB64){
+  const iv=_b64de(ivB64);const ct=_b64de(ctB64);
+  const ck=await crypto.subtle.importKey('raw',keyBytes,{name:'AES-GCM'},false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},ck,ct);
+  return new TextDecoder().decode(pt);
+}
+function _loadAllTrust(){try{const raw=localStorage.getItem(TRUST_STORE_NAME);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object')return o;}}catch(e){}return {};}
+async function setSyncTrust(profileId,passcode,days){
+  if(!profileId||!passcode)return;
+  try{
+    const key=_ensureDevKey();const enc=await _aesGcmEnc(key,passcode);
+    const all=_loadAllTrust();all[profileId]={ct:enc.ct,iv:enc.iv,expiresAt:Date.now()+days*86400000};
+    localStorage.setItem(TRUST_STORE_NAME,JSON.stringify(all));
+  }catch(e){console.warn('setSyncTrust failed',e);}
+}
+async function decryptSyncTrust(profileId){
+  const rec=_loadAllTrust()[profileId];
+  if(!rec||!rec.expiresAt||rec.expiresAt<Date.now())return null;
+  try{const key=_ensureDevKey();return await _aesGcmDec(key,rec.ct,rec.iv);}
+  catch(e){return null;}
+}
+function getTrustRemainingDays(profileId){
+  const rec=_loadAllTrust()[profileId];
+  if(!rec||!rec.expiresAt)return 0;
+  const ms=rec.expiresAt-Date.now();
+  return ms<=0?0:Math.ceil(ms/86400000);
+}
+function trustActive(profileId){return getTrustRemainingDays(profileId)>0;}
+function clearSyncTrust(profileId){
+  try{
+    if(profileId){const all=_loadAllTrust();delete all[profileId];localStorage.setItem(TRUST_STORE_NAME,JSON.stringify(all));}
+    else localStorage.removeItem(TRUST_STORE_NAME);
+  }catch(e){}
+}
 /* 内置默认账户（硬编码）：首次打开/清缓存/新设备连接时自动出现，无需手填 token。
    注意：token 明文硬编码于源码，仅建议用于个人 gist 权限的 token；passcode 不内置，需登录输入。 */
 /* 内置默认账户 Token：故意拆分为两段拼接，仅为规避 GitHub 推送保护对明文 ghp_ 密钥的误报；运行时拼接值与原 Token 完全一致 */
@@ -2994,24 +3055,60 @@ async function loginToProfile(profile,passcode,opts={}){
 /* 弹出登录框（输入 passcode 即"登录"，类似登录效果） */
 function promptLogin(profile){
   if(!profile||!profile.binId){toast('该账户尚未配置 Gist ID');return;}
+  const defaultDays=7;
   modal(`<h4>登录云同步账户<span class="modal-close" onclick="closeModal()">×</span></h4>
     <p class="muted" style="margin:0 0 12px">正在登录：<b>${esc(profile.name)}</b></p>
     <div class="privacy-box" style="margin:0 0 12px">数据经 <b>AES-GCM 端到端加密</b>后存于 GitHub Gist。请输入该账户的加密 Passcode 以解密同步数据。</div>
-    <input id="loginPass" type="password" class="sync-input" placeholder="加密 Passcode">
+    <input id="loginPass" type="password" class="sync-input" placeholder="加密 Passcode" autocomplete="off">
     <div id="loginErr" style="color:var(--bad);font-size:12px;min-height:16px;margin:4px 0 8px"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:10px 0 6px;cursor:pointer">
+      <input id="loginTrust" type="checkbox" checked style="width:16px;height:16px;accent-color:var(--text)"> <b>记住本设备</b>
+      <span class="muted" style="font-size:12px">本机 ${defaultDays} 天内无需输入 Passcode 即可解密云端</span>
+    </label>
+    <div id="loginTrustDays" style="display:flex;gap:6px;margin:0 0 8px;font-size:12px">
+      ${_TRUST_DAYS.map(d=>`<button type="button" class="sync-day-btn${d===defaultDays?' active':''}" data-d="${d}" style="flex:1;padding:6px 4px;border:1px solid var(--line);border-radius:var(--r-sm);background:${d===defaultDays?'var(--text)':'#fff'};color:${d===defaultDays?'#fff':'var(--text)'};cursor:pointer;font-weight:${d===defaultDays?600:400}">${d===1?'仅本次':d+'天'}</button>`).join('')}
+    </div>
     <div class="btn-pair">
       <button id="loginCancel" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px">取消</button>
       <button id="loginOk" style="flex:1;background:var(--text);color:#fff;border-radius:var(--r-sm);padding:11px;font-weight:600">登录并同步</button>
     </div>`,{noMaskClose:true});
+
+  /* 信任天数选择 + 主开关联动 */
+  let _days=defaultDays;
+  const _refreshDays=()=>{
+    $('#loginTrustDays').querySelectorAll('.sync-day-btn').forEach(x=>{
+      const on=parseInt(x.getAttribute('data-d'),10)===_days;
+      x.style.background=on?'var(--text)':'#fff';
+      x.style.color=on?'#fff':'var(--text)';
+      x.style.fontWeight=on?600:400;
+    });
+  };
+  $('#loginTrustDays').querySelectorAll('.sync-day-btn').forEach(b=>{
+    b.onclick=()=>{_days=parseInt(b.getAttribute('data-d'),10);_refreshDays();$('#loginTrust').checked=_days>=3;};
+  });
+  $('#loginTrust').onchange=(e)=>{
+    if(!e.target.checked){_days=1;}
+    else if(_days===1){_days=defaultDays;}
+    _refreshDays();
+  };
+
   const tryLogin=async()=>{
     const pw=$('#loginPass').value;
     if(!pw||pw.length<4){$('#loginErr').textContent='Passcode 至少 4 位';return;}
     const btn=$('#loginOk');btn.disabled=true;btn.textContent='验证中…';
     try{
       await loginToProfile(profile,pw,{silent:true});
+      /* 信任缓存：≥3 天才真正加密存（1 天即"仅本次"语义上不留） */
+      if(_days>=3){
+        await setSyncTrust(profile.id,pw,_days);
+        const flag='wb_sync_trust_toasted_'+profile.id;
+        if(!localStorage.getItem(flag)){toast('已记住此设备 '+_days+' 天，下次免输入');try{localStorage.setItem(flag,'1');}catch(e){}}
+      }else{
+        clearSyncTrust(profile.id);
+      }
       closeModal();toast('已登录 '+profile.name);
     }catch(e){
-      sessionPasscode=null;btn.disabled=false;btn.textContent='登录并同步';
+      sessionPasscode=null;clearSyncTrust(profile.id);btn.disabled=false;btn.textContent='登录并同步';
       $('#loginErr').textContent='登录失败：'+(e.message&&e.message.includes('decrypt')?'Passcode 错误':(e.message||e));
     }
   };
@@ -3036,10 +3133,13 @@ function renderAccountManager(){
     const del=(syncProfiles.length>1)?`<button class="acc-btn danger" data-del="${esc(p.id)}">删除</button>`:'';
     return `<div class="acc-row"><div class="acc-info"><div class="acc-name">${esc(p.name)}</div><div class="acc-gist">Gist ${esc(maskGist(p.binId))}</div></div><div class="acc-acts">${acts}${del}</div></div>`;
   }).join('');
+  const trustDays=cur?getTrustRemainingDays(cur.id):0;
+  const trustRow=cur&&trustDays>0?`<div class="sync-row"><span>本机信任</span><span style="font-size:13px">已记住 ${trustDays} 天 <button class="acc-btn danger" id="revokeTrust" style="margin-left:6px;padding:2px 8px;font-size:12px">撤销信任</button></span></div>`:'';
   const curCard=loggedIn?`<div class="sync-status-box" style="margin-bottom:12px">
       <div class="sync-row"><span>当前账户</span><b>${esc(cur.name)}</b></div>
       <div class="sync-row"><span>状态</span><span id="syncStatus2" class="sync-dot on">已同步</span></div>
       <div class="sync-row"><span>Gist ID</span><code title="${esc(cur.binId)}">${esc(cur.binId)}</code></div>
+      ${trustRow}
       <div class="sync-row"><span>加密</span><span style="font-size:12px">AES-GCM 256</span></div>
     </div>`:`<div class="privacy-box" style="margin-bottom:12px">当前未登录。点击账户「切换」或下方「新增账户」并输入 Passcode 即可登录；账户配置（名称/Gist ID/Token）已保留，无需重复填写。</div>`;
   modal(`<h4>云同步 · 账户管理<span class="modal-close" onclick="closeModal()">×</span></h4>
@@ -3059,6 +3159,8 @@ function renderAccountManager(){
   $('#modalBox').querySelectorAll('[data-switch]').forEach(b=>b.onclick=()=>{const p=syncProfiles.find(x=>x.id===b.getAttribute('data-switch'));if(p)switchProfile(p);});
   $('#modalBox').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{deleteProfile(b.getAttribute('data-del'));});
   $('#addAccBtn').onclick=addAccount;
+  const _rk=$('#revokeTrust');
+  if(_rk)_rk.onclick=()=>{clearSyncTrust(cur.id);toast('已撤销本机信任，下次打开需重新输入 Passcode');renderAccountManager();};
   if(loggedIn){
     $('#syncNowBtn').onclick=async()=>{closeModal();await cloudPush();await cloudPull();toast('已双向同步');};
     $('#syncHistoryBtn').onclick=openSyncHistory;
@@ -4187,7 +4289,18 @@ renderSyncBtn();
   if(localStorage.getItem('wb_sync_off')){
     setSyncStatus('off'); /* 曾退出登录：不自动弹登录框，留待用户手动进入 */
   }else{
-    promptLogin(p);       /* 自动弹出登录框，输入 passcode 后拉取云端数据（登录效果） */
+    /* v3.17 信任本设备 N 天免输入：先尝试用本地加密缓存的 Passcode 无感登录 */
+    (async()=>{
+      const pw=await decryptSyncTrust(p.id);
+      if(pw){
+        try{
+          await loginToProfile(p,pw,{silent:true});
+          setSyncStatus('ok');renderSyncBtn();
+          return;
+        }catch(e){clearSyncTrust(p.id);} /* 自动登录失败清除缓存，重新弹框 */
+      }
+      promptLogin(p);
+    })();
   }
 })();
 </script>

@@ -1406,10 +1406,25 @@ $$('nav.tabbar a').forEach(a=>a.addEventListener('click',()=>{
   $('#page-'+p).classList.add('active');
   if(p==='today')renderWorklog();if(p==='money')renderMoney();if(p==='heat')renderHeat();if(p==='notes')renderNotes();if(p==='history')renderActiveHis();if(p==='learning')renderLearning();
   /* 强制滚动到指定 sec（被 goTab 第二参数触发，普通 tabbar 切换不进入） */
+  /* 时序: ① 立即清 window scrollTop（去掉切换前的残留位置）
+         ② 80ms 后第一次精确滚动（等 .page 完成 display:none→block + fade 动画起手）
+         ③ 400ms 后第二次 instant 兜底（防 iOS PWA layout shift 漂移）
+         ④ target.offsetTop 而非 scrollIntoView 避免 sticky header 干扰 */
   if(a.dataset._forceScroll){
-    const sel=a.dataset._forceScroll,t=$(sel);
-    if(t){requestAnimationFrame(()=>{t.scrollIntoView({behavior:'smooth',block:'start'});t.classList.add('sec-flash');setTimeout(()=>t.classList.remove('sec-flash'),1300);});}
+    const sel=a.dataset._forceScroll;
     delete a.dataset._forceScroll;
+    /* ① 立即从 0 开始 */
+    try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}catch(e){}
+    /* 拿到目标的 offsetTop（相对文档）后多次跳到那里 */
+    const scrollToTarget=(behavior)=>{
+      const t=$(sel);if(!t)return;
+      const rect=t.getBoundingClientRect();
+      const absTop=rect.top+window.scrollY;
+      window.scrollTo({top:Math.max(0,absTop),behavior});
+      if(!t.classList.contains('sec-flash')){t.classList.add('sec-flash');setTimeout(()=>t.classList.remove('sec-flash'),1300);}
+    };
+    setTimeout(()=>scrollToTarget('smooth'),80);
+    setTimeout(()=>scrollToTarget('auto'),400);
   }
 }));
 function goTab(p,opts){

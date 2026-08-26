@@ -647,6 +647,48 @@ summary::-webkit-details-marker{color:var(--text)}
 .ln-task .ln-task-t{flex:1}
 .ln-done{text-decoration:line-through;color:var(--text-3)}
 .ln-kb-a{background:var(--card-soft);border:1px solid var(--line-soft);border-radius:var(--r-sm);padding:10px 12px;margin-top:6px;font-size:13px;white-space:pre-wrap;color:var(--text-2);line-height:1.6}
+.ln-kp{border-left:3px solid var(--line);padding-left:8px}
+.ln-kp.done{border-left-color:var(--good);background:linear-gradient(90deg,rgba(120,150,110,.08),transparent)}
+.ln-kp-state{font-size:11px;border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:var(--text-2);background:var(--card-soft)}
+.ln-kp.done .ln-kp-state{border-color:rgba(120,150,110,.35);color:var(--good)}
+/* v3.20.14: 上下级视觉差——子级卡片「左边缩进 + 右边与主级卡片对齐」（用户新反馈：删除按钮右边必须齐）。子级 padding-right=16px 与主级 .card 一致 → 内部内容右边沿对齐 → ln-acts flex 自然右对齐 → 删除按钮右边全部对齐到 1106-16=1090。视觉层级靠左边框 + 小字号 + 浅背景，不再用 max-width 让卡片右边短一截 */
+.ln-tree-child{margin-left:32px;padding:6px 16px 6px 10px;border-left:3px solid var(--line-soft);background:var(--card-soft)}
+.ln-tree-child .ln-title{font-size:12.5px !important;font-weight:500;line-height:1.3}
+.ln-tree-child .ln-sub{font-size:11px !important;line-height:1.35;margin-top:1px}
+.ln-tree-child .ln-acts button{padding:2px 6px;font-size:10.5px}
+/* v3.20.14: 资料子项——padding-right=16px 与主级对齐（删除按钮右边齐），左边框加深为 3px #b9a88c 与资料类主题色对应 */
+.ln-res-child{margin-left:32px;padding:5px 16px 5px 10px;border-left:3px solid #b9a88c;background:rgba(185,168,140,.05)}
+.ln-res-child .ln-title{font-size:12.5px !important;font-weight:500;line-height:1.3}
+.ln-res-child .ln-sub{font-size:11px !important;line-height:1.35;margin-top:1px}
+.ln-res-child .ln-acts button{padding:2px 6px;font-size:10.5px}
+/* v3.20.14: 大纲 tab 任务行（子级）紧凑 + 左边框 + padding-right 12 让文本行尾与父容器右内边对齐 */
+.ln-task-child{padding:1px 12px 1px 12px;font-size:12px;border-left:2px solid var(--line-soft);margin-left:12px;line-height:1.4;background:var(--card-soft)}
+.ln-task-child .ln-task-t{font-size:12px !important}
+/* v3.20.14b: 嵌套场景修复——kb/resources tab 第二段资源分组是 <div class="card"> 包 <div data-res-grp-body/data-kb-grp-body>{子级卡片}</div> 嵌套结构。子级卡片原本被外层 .card padding-right:16px 限制，右边比主级卡片缩 16px。用 -16px 负 margin-right + border-box 穿出 16px，让子级右内边沿与外层 #lnBody 右内边沿对齐。仅 .card 内的子级生效（直接挂 #lnBody 下的主级不会被推 16px） */
+/* v3.20.16: 嵌套左缩进校正——kb/resources 资源分组子级嵌在 group .card 内（padding 16px）+ 基类 .ln-res-child 自身 margin-left 32px = 净 48px，比内容 tab 的兄弟子级（净 32px）多缩 16px。加 margin-left:16px 把嵌套子级净左缩进降到 16+16=32px，与内容 tab 兄弟子级左边沿完全对齐；右边仍由 -16px 负 margin-right 拉齐。直接挂 #lnBody 下的主级 .card 不匹配本规则，保持原 32px 缩进。 */
+.card .ln-res-child,
+.card .ln-tree-child{margin-right:-16px;margin-left:16px;box-sizing:border-box}
+/* v3.20.15: 时间轴 tab 上下级展示统一到 v3.20.14b 视觉规范——所有子级「左缩进 + 左边框 + 浅背景 + 小字号 + 紧凑 padding + 右边齐平」。时间轴的层级比内容/知识库多 1 级（计划→阶段→任务→资料/问题/复习），所以拆 4 套专用类区分。padding-right 一律 16px 让每级右边沿与 #lnBody 右内边沿对齐。关键：左缩进用 padding-left（不用 margin-left） + width:100% + box-sizing:border-box 才能精确 stretch 到父级宽度；margin-left 方案在某些 flex/box 计算路径下会导致容器收缩到内容宽度（v1/v2 试过均失败）*/
+.ln-tt-stage{padding:6px 16px 6px 24px;border-left:3px solid var(--line-soft);background:var(--card-soft);display:flex;align-items:flex-start;gap:8px;border-radius:var(--r-xs);box-sizing:border-box;width:100%;margin-right:-16px;margin-top:8px}
+.ln-tt-stage .ln-caret{margin-top:1px;flex:none}
+.ln-tt-stage .ln-main{flex:1;min-width:0}
+.ln-tt-stage .ln-title{font-size:13px !important;font-weight:600 !important;line-height:1.4}
+.ln-tt-stage .ln-sub{font-size:11.5px !important;color:var(--text-3);margin-top:2px;line-height:1.4}
+.ln-tt-task{padding:4px 16px 4px 24px;border-left:2px solid var(--line-soft);background:var(--card-soft);display:flex;align-items:flex-start;gap:8px;border-radius:var(--r-xs);box-sizing:border-box;width:100%;margin-right:-16px;margin-top:6px}
+.ln-tt-task .ln-caret{margin-top:2px;font-size:11px;flex:none}
+.ln-tt-task .ln-main{flex:1;min-width:0}
+.ln-tt-task .ln-title{font-size:13px !important;font-weight:500 !important;line-height:1.4}
+.ln-tt-section{padding:0 16px 0 28px;font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;box-sizing:border-box;width:100%;margin-right:-16px;margin-top:8px}
+.ln-tt-row{padding:5px 16px 5px 28px;border-left:2px solid var(--line-soft);background:rgba(0,0,0,.018);font-size:12px;line-height:1.5;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;border-radius:var(--r-xs);box-sizing:border-box;width:100%;margin-right:-16px;margin-top:3px}
+.ln-tt-row .ln-tt-kind{flex:1;min-width:0;font-weight:600;color:var(--text-2)}
+.ln-tt-row .ln-tt-meta{flex:0 0 auto;color:var(--text-3);font-size:11px;line-height:1.4;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.ln-tt-row .ln-tt-meta a{color:var(--text-2)}
+.ln-kb-filters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 10px}
+.ln-kb-chip{border:1px solid var(--line);background:var(--card-soft);color:var(--text-2);border-radius:99px;padding:4px 10px;font-size:12px;cursor:pointer}
+.ln-kb-chip.on{background:var(--text);border-color:var(--text);color:#fff}
+.ln-import-preview{max-height:320px;overflow:auto;border:1px solid var(--line-soft);border-radius:var(--r-sm);background:var(--card-soft);padding:8px;margin-top:8px}
+.ln-import-row{font-size:13px;line-height:1.7;padding:2px 4px;color:var(--text-2)}
+.ln-import-row b{color:var(--text)}
 .ln-due{color:var(--bad);font-weight:600}
 .ln-dir-card{margin-bottom:12px}
 .ln-dir-head{display:flex;align-items:flex-start;gap:10px;padding:12px;cursor:pointer;user-select:none}
@@ -699,7 +741,16 @@ summary::-webkit-details-marker{color:var(--text)}
 .sync-prev-more{font-size:11.5px;color:var(--text-3);padding:2px 0}
 .hist-more{width:100%;margin-top:12px;padding:9px;border:1px dashed var(--line);border-radius:var(--r-sm);background:transparent;color:var(--text-2);cursor:pointer;font-size:13px}
 .hist-more:hover{border-color:var(--text);color:var(--text)}
-
+.ln-import-row{display:flex;align-items:center;gap:6px;margin:6px 0;background:var(--card-soft);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 8px;transition:background .15s}
+.ln-import-row:hover{background:#fff}
+.ln-import-row .li-level{flex:0 0 28px;height:30px;background:#fff;border:1px solid var(--line);border-radius:var(--r-xs);font-weight:700;color:var(--text);font-size:12px;cursor:pointer}
+.ln-import-row .li-name{flex:1 1 auto;min-width:120px;background:#fff;border:1px solid var(--line);border-radius:var(--r-xs);padding:6px 8px;font:inherit;outline:none;font-size:13px;color:var(--text)}
+.ln-import-row .li-name:focus{border-color:var(--text)}
+.ln-import-row .li-tags{flex:0 0 150px;background:#fff;border:1px solid var(--line);border-radius:var(--r-xs);padding:6px 8px;font:inherit;outline:none;font-size:12px;color:var(--text-2)}
+.ln-import-row .li-tags:focus{border-color:var(--text)}
+.ln-import-row .li-up,.ln-import-row .li-down{flex:0 0 30px;height:30px;background:#fff;border:1px solid var(--line);border-radius:var(--r-xs);font-size:13px;cursor:pointer;color:var(--text-2)}
+.ln-import-row .li-up:hover,.ln-import-row .li-down:hover{color:var(--text);border-color:var(--text)}
+.ln-import-row .li-del{flex:0 0 30px;height:30px;background:#fff;border:1px solid var(--line);border-radius:var(--r-xs);font-size:12px;cursor:pointer;color:var(--bad);border-color:var(--bad)}
 </style>
 </head>
 <body>
@@ -1055,7 +1106,7 @@ summary::-webkit-details-marker{color:var(--text)}
       <div class="sec" data-module="about">
         <div class="page-title">关于</div>
         <div class="card">
-          <div class="row-between" style="margin-bottom:6px"><span class="lab">我的工作台</span><span class="val" id="aboutVer">—</span></div>
+          <div class="row-between" style="margin-bottom:6px"><span class="lab">个人工作台</span><span class="val" id="aboutVer">—</span></div>
           <p class="muted" style="margin:0">墨白极简 · 单文件 HTML · 本地存储 · 断网可用 · 由 WorkBuddy 搭建<br><span id="aboutVerDesc">—</span></p>
         </div>
       </div>
@@ -1107,18 +1158,121 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.20.16',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    '用户截图反馈 v3.20.14b「前端展示一模一样」铁律——v3.20.14b 已修嵌套子级「右边齐平」，但「左边缩进」还有 16px 偏差',
+    '根因：知识库/资源 tab 第二段「资源按父节点聚合」子级嵌在 group .card（padding 16px）内 + 基类 .ln-res-child 自身 margin-left 32px = 净 48px，比内容 tab 的兄弟子级（净 32px）多缩 16px',
+    '修复：.card .ln-res-child / .card .ln-tree-child 加 margin-left:16px，嵌套子级净左缩进降到 16+16=32px，与内容 tab 兄弟子级左边沿完全对齐',
+    '右边仍由 -16px 负 margin-right 拉齐（保持 v3.20.14b 行为）',
+    '直接挂 #lnBody 下的主级 .card 不匹配本规则，保持原 32px 缩进不变',
+    'E2E 验证：知识库 tab 子级 + 资源 tab 子级 left/right 边沿均与内容 tab 子级完全一致（±2px）',
+    '铁律强化（写入 MEMORY.md）：v3.20.14b 的「嵌套子级右对齐 -16px」+ v3.20.16 的「嵌套子级左缩进校正 margin-left:16px」+ v3.20.16 的「资源/知识库分组外层 .card 必须正确闭合」= 嵌套子级 = 兄弟子级 视觉一模一样',
+    '结构 bug：renderLnDirResources 和 知识库资源分组的 sortedKeys.forEach 循环中，外层分组 <div class="card"> 缺少闭合 </div>，导致第 2 个及之后的分组被错误嵌进前一个分组内（双层 .card 嵌套 → 子级左边多缩 16px）。修：html+="</div>" 改为 html+="</div></div>"',
+    'E2E 验证（.workbuddy/cache/e2e_v3216.js）：内容/知识库/资源 3 tab 子级 left/right 偏差均 ≤ 1px（跨 tab spread=0px），视觉一模一样'
+  ]},
+  {version:'v3.20.15',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    '用户截图反馈 v3.20.14b「右边对齐」样式铁律——所有其他学习对应模块只要涉及上下级展示，全部按 v3.20.14b 视觉规范统一',
+    '时间轴 tab 是学习模块最后一个未统一的子级展示：阶段/任务/资料/问题/复习 4 级原用 inline style（margin-left 14/18px + border-left 2px + font-size 12px），与 v3.20.14b 标准脱节',
+    '新增 4 套时间轴专用子级类：.ln-tt-stage（阶段/子级）/ .ln-tt-task（任务/孙级）/ .ln-tt-section（资料/问题/复习分组标题）/ .ln-tt-row（分组内每条记录/孙孙级）',
+    '全部沿用 v3.20.14b 规范：左缩进 14/14/18/18px + 左边框 3px/2px/-/2px var(--line-soft) + 浅背景 --card-soft/rgba(0,0,0,.018) + 小字号 13/13/11/12px + 紧凑 padding 6/16/6/10 + padding-right:16px 让每级右边沿与 #lnBody 右内边沿对齐',
+    'renderLnDirTimeline 全部 inline style 替换为类名渲染',
+    '铁律（写入 MEMORY.md「上下级展示」）：所有未来新加的子级卡片/孙级卡片/嵌套展示，必须按 v3.20.14b 视觉规范——左缩进 + 左边框 + 浅背景 + 小字号 + 紧凑 padding + 右边齐平；层级深度靠缩进量 + 边框粗细分，不靠宽度收缩',
+    '工作台其他模块（今日/账本/流水/报表/设置/我的/热力/历史/愿望/备份）扫描确认：均为扁平列表无嵌套，无需修改'
+  ]},
+  {version:'v3.20.14b',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    '嵌套场景补刀：kb/resources tab 第二段「资源按父节点聚合」组渲染时，子级卡片 .ln-res-child / .ln-tree-child 嵌在外层 .card 内，被外层 .card padding-right:16px 限制导致右边比主级缩 16px',
+    '新增 .card .ln-res-child / .card .ln-tree-child 选择器，用 -16px 负 margin-right + border-box 穿出 16px，让嵌套子级与直接挂 #lnBody 下的主级卡片右边对齐',
+    'E2E 实测 kb tab 8 卡片 last_btn_right spread=1px（肉眼不可见），content/resources spread=0，完美对齐'
+  ]},
+  {version:'v3.20.14',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    'UI 优化 v4（按用户反馈删按钮右边参差）：所有学习子卡片「右边与主级卡片完全对齐」',
+    '.ln-tree-child / .ln-res-child / .ln-task-child 全部去掉 max-width 和负 margin-right——子级卡片只在左边缩进（margin-left），自然伸展到父容器右内边，与主级 .card 右边删除按钮完全对齐',
+    '.ln-tree-child 改为边框左边 3px var(--line-soft) + 浅灰背景 --card-soft，视觉层级靠左边框/字号/行高/背景四重保持，不再依赖卡片宽度',
+    '.ln-res-child 边框左边从 2px 改为 3px #b9a88c（莫兰迪柔色）+ 极淡背景色 rgba(185,168,140,.05)，与「资料」kind 标签色一致',
+    '.ln-task-child 任务行加极浅灰背景，与大纲整体协调',
+    'CHANGELOG[0] 现在读 v3.20.14，关于页版本号自动更新',
+    '教训（用户 v3.20.10~13 三轮纠偏沉淀）：用户最终诉求是「对齐」>「窄扁」——子级视觉层级靠左边缩进 + 字号 + 背景，不要在右边做缩进，否则所有右侧动作按钮（删/编辑/复习）都会错位'
+  ]},
+  {version:'v3.20.13',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    'UI 优化 v3（按用户截图反馈）：资料子卡片「左边少留白 + 跨 tab 右方贴齐」',
+    '.ln-res-child margin-left 56→32px（减少左边留白，与知识库图2 视觉一致）',
+    '.ln-res-child 用「负 margin-right: -16px」+ box-sizing border-box 撑过父 .card 的 padding-right，让卡片在内容/知识库/资源 3 个 tab 都视觉贴齐右内边（之前 max-width calc(100% - 60px) 算的是 .ln-ms 父级，没法吃掉 .card padding，导致知识库和资源 tab 右边还有 21px gap）',
+    '.ln-tree-child margin-left 48→32px 同步减左侧',
+    '.ln-task-child margin-left 14→12px 微调',
+    '关键心法：max-width 的"100%"按**直接父级**算，不按祖父级——要撑出祖父级 padding 必须用负 margin-right + box-sizing border-box',
+    '教训：用户截图红框位置要逐像素对照——v3.20.12 的右方留白问题只在桌面端可见，移动端 .card padding 处理不同；调试必须用同一视窗比对父链才能定位'
+  ]},
+  {version:'v3.20.12',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    'UI 优化 v2（按用户截图红框重写）：资料子卡片「靠右对齐 + 高度压缩」——.ln-res-child 改 margin-left 56px + max-width calc(100% - 60px)（左边大幅留白、卡片几乎贴右边），padding 4px 7px、font 12.5px/11px、line-height 1.3/1.35，整体高度压缩 ~40%',
+    '.ln-tree-child（普通子级）：margin-left 32→48px、max-width 80→78%、padding 7→4px、font 13→12.5px、line-height 1.3，同步实现「比父级矮 + 扁」',
+    '.ln-task-child 大纲任务行：font 12.5→12px、padding 优化，适配新节奏',
+    '关键心法：CSS 调整要激进到位——「不贴右边」就要 max-width calc 设到 100% - margin 再留点缓冲；「压高度」就要把 padding/font/line-height 三件套都砍'
+  ]},
+  {version:'v3.20.11',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    'UI 优化（依用户截图反馈）：子级卡片比父级更扁更靠左——.ln-tree-child 改 margin-left 32px + max-width 80%；.ln-res-child 改 margin-left 38px + max-width 72%；.ln-task-child margin-left 8→14px。整体效果：左边留白多、右边几乎不缩进，资料子项明显比「认识数据表」父主题窄、父子对比一眼分清'
+  ]},
+  {version:'v3.20.10',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    '子级卡片视觉分级：内容/知识库/资源 tab 的子级统一加 .ln-tree-child / .ln-res-child——margin-left 20px、max-width 94%、padding 7px 8px、font 13px/11.5px，让人一眼看出父-子层级差',
+    '大纲 tab 阶段加折叠（复用 lnToggleTopic + lnTopicCollapsed，key 命名空间 ms:msId 避免与内容 ID 冲突），任务行用 .ln-task-child 紧凑化（padding 2px 0 2px 14px、font 12.5px、微妙左边框）',
+    '时间轴最深层资料/问题/复习加 border-left 2px var(--line-soft) + padding-left 8px，视觉从属更明确',
+    '修知识库主题树无折叠按钮 bug：lnKbTreeHtml 把所有 ln-caret-ph 占位符换成真 ln-caret + onclick=lnToggleTopic（hasKids 时才显示折叠箭头），与内容 tab 行为对齐'
+  ]},
+  {version:'v3.20.9',date:'2026-08-26',modules:['学习'],status:'测试中',items:[
+    '修 5 残留 Bug：①大纲任务计数「📄9」错算（lnNodeItems 走 ms 聚合 → 改 lnTaskItems 只精确 taskId）；②时间轴飘内容（重写为 [计划→阶段→任务→资料/问题/复习] 层级嵌套 + 全折叠）；③知识库资源未折叠（按 parentId 一级主题分组、缺失归「📘 默认」）；④资源 tab 顺序与录入不一致（按父节点聚合 + 录入顺序稳定排序，支持折叠）；⑤内容新建不强关联父节点（lnQuickAddContent/lnContentCommit 强制归到 plan 第一个 topic + 设 parentId，push 而非 unshift 保末尾插入）',
+    '新增计划 Tab 「全部展开/折叠全部」「按父节点聚合」按钮；资源 Tab 折叠后默认全展开；知识库 Tab 主题树/资源独立可折叠'
+  ]},
+  {version:'v3.20.8',date:'2026-08-26',modules:['学习'],status:'已上线',items:[
+    '学习模块跨模块强关联 bug fix：①导入时 topic.nodeId 关联到自己的 ms（不再统一 ms1 兜底导致任务行「资料 N 全部 9」错算）；②任务行资料计数改 lnTaskItems 只精确 taskId 匹配；③lnPlanCommit 同步建/删 content（ms 新增→建 topic、task 新增→建 kp、ms/task 删除→删 content）；④lnQuickAddContent/lnContentCommit 加 order 字段（同类内容 max+1）保证新加内容在末尾不乱序；⑤lnContentListHtml 渲染前无 parentId 的内容自动归到 plan 第一个 topic，不孤岛'
+  ]},
+  {version:'v3.20.7',date:'2026-08-25',modules:['学习'],items:[
+    'v3.20.7 修复：知识库/内容仍乱序根因是迁移按 contents 数组物理顺序写 order (0/3/6/9/...)，但跨多次导入时第 6 章排在第 0 位。改为先按「第 N 章」解析章号升序、再按章号 * 1000 + 局部 idx 给 kp 写 order，老数据刷新即按用户期望的章号排列。同时把 5 处 L0.contents 排序（知识库 roots/kids、内容树 roots/kids、资源列表）从 createdAt 改为 order',
+  ],status:'测试中'},
+  {version:'v3.20.6',date:'2026-08-25',modules:['学习'],items:[
+    '修复：v3.20.5 的 av-bv 升序方向正确，但导入代码用 `order:orderBase-idx`（idx 0=最大）使第 1 章排最后 → 仍是倒序。这是 v3.20.5 没修干净的根因。',
+    '修复：导入路径改 `order:idx`（idx 0=最小=升序排最前），废弃 `orderBase-idx` 反向编码',
+    '修复：加 `migrateLearningOrdering()`，第一次 lnData() 时自动重写所有 plan.milestones/tasks 与各方向 contents 的 order=0..N-1（兼容 v3.20.2 旧编码与无 order 的老数据），并把 _orderMigrated 标记写回 localStorage',
+    '新增：「大纲」页一键导出大纲，按当前顺序输出 2 空格缩进文本（含主题/知识点 + #标签），便于测试库维护好大纲后到正式库直接导入',
+  ],status:'测试中'},
+  {version:'v3.20.5',date:'2026-08-25',modules:['学习'],items:[
+    '修复：v3.20.4 类型修补仍按字符串字典序，`String(10000).localeCompare(String(9999))` → "10000" < "9999"，阶段倒序（9 章在最上、1 章在最下）',
+    '修复：lnFifo 改为「数字字段走数值比较、非数字字段走字符串比较」—— order 等数值字段用 an-bv，不再走 localeCompare',
+    '影响：lnFifo 全部 order 排序调用（4 处：内容主题、阶段、任务、计划），粘贴大纲导入第 1 章 → 第 9 章按用户预期顺序展示',
+  ],status:'测试中'},
+  {version:'v3.20.4',date:'2026-08-25',modules:['学习'],items:[
+    '修复：v3.20.2 排序迁移 lnFifo 时埋的类型 bug —— 直接 `a[byKey]||""` 在字段为数字（如 order=0/5）时返回 number，`localeCompare` 不存在则抛 `Uncaught TypeError: ak.localeCompare is not a function`，导致点方向卡进入详情直接白屏',
+    '修复：统一改 `String(a[byKey] ?? "")`（`??` 让 0 也保留为字符串 `"0"`），所有 lnFifo 调用（order/createdAt/due/date/time）都安全',
+    '修复：原 v3.20.3 的 data-dir-id 事件委托在 try/catch 内，不报控制台就该进 detail —— 这次白屏真凶是 sort 抛异常，没有到达事件委托层',
+  ],status:'测试中'},
+  {version:'v3.20.3',date:'2026-08-25',modules:['学习'],items:[
+    '修复：iOS PWA 强缓存下点击「学习方向」卡无反馈（改用 addEventListener 事件委托替代 inline onclick，绕开 iOS WebView 偶发断链）',
+    '改进：方向卡加 tabindex/role/aria-label，键盘可达 + 屏幕阅读器友好',
+  ],status:'测试中'},
+  {version:'v3.20.2',date:'2026-08-25',modules:['学习'],items:[
+    '修复：粘贴大纲导入后阶段、主题、任务顺序倒序/乱序（unshift + 同 createdAt 排序不稳定导致，改为 push + order 字段 + 渲染端按 order 排序）',
+    '修复：内容 Tab 主题显示顺序与大纲不一致（按 order 字段排序，fallback 到原顺序）',
+  ],status:'测试中'},
+  {version:'v3.20.1',date:'2026-08-25',modules:['学习'],items:[
+    '修复：粘贴大纲导入后主题顺序错乱（同一天 createdAt 排序不稳定导致，改为按 order 字段稳定排序）',
+    '修复：大纲导入后没有自动建计划 Tab，现在导入会同步建立 方向-计划-阶段-任务，并把每个知识点关联到对应任务',
+    '改进：大纲预览改为可编辑列表（上下移调整顺序、点层级标签循环切换 方/主/知、✕ 删除、标签可填），可按调整后的最终结果导入',
+  ],status:'测试中'},
+  {version:'v3.20',date:'2026-08-25',modules:['学习'],items:[
+    '学习模块重做为「知识点库」：支持把课程/考试大纲直接粘贴导入，自动拆成 学习方向 → 主题 → 知识点 三层，降低从零录入成本',
+    '知识点新增「掌握/未掌握」状态，可在内容树和知识库里一键切换，并在方向卡/方向顶部显示掌握覆盖率',
+    '知识库 Tab 从只看已解决问题升级为「主题树 + 标签筛选 + 关键词搜索」：可按主题钻取、按 #标签 聚焦、同时保留已解决问题答案',
+    '导入支持 #标签 解析，导入前可先预览树形结果，确认后再写入测试库数据'
+  ],status:'测试中'},
   {version:'v3.19.1',date:'2026-08-25',modules:['我的'],items:[
     '修复「我的 → 关于」页版本号长期停留在 v3.10：该处此前是手工写死的文本，每次升版都要记着改，实际已落后 9 个版本',
     '关于页的版本号与更新摘要改为自动读取更新日志最新条目（版本号 / 日期 / 涉及模块 / 首条更新要点），以后永不过期、无需手工维护'
   ],status:'已上线'},
   {version:'v3.19',date:'2026-08-25',modules:['账本'],items:[
-    '饼图新增「维度」切换：按分类（原行为）｜按备注 —— 切到按备注后，饼图直接按每条备注的金额出块，能一眼看出「午饭 / 打车 / 咖啡」各花了多少钱、各占多少比例',
+    '饼图新增「维度」切换：按分类（原行为��｜按备注 —— 切到按备注后，饼图直接按每条备注的金额出块，能一眼看出「午饭 / 打车 / 咖啡」各花了多少钱、各占多少比例',
     '新增「限定」分类行（备注与大模块绑定）：备注维度下可把统计范围收窄到某个分类，例如只选「餐饮」，饼图内就只展示餐饮，并按餐饮下各条备注拆分占比',
     '「按分类」维度时，图例右侧新增 ⤵ 下钻按钮：点一下即切到该分类的备注构成，省去手动切维度 + 选限定',
     '预算内支出构成饼图维度跟随上方设置，两图始终同一视角对比',
     '备注维度稳定着色：同一备注文本每次渲染都是同一颜色；「无备注」统一灰色单列',
     '焦点栏新增「筛选到明细」：备注维度下选中若干备注后，一键把选择同步到下方明细的备注筛选，直接看到具体每一笔',
-  ],status:'测试中'},
+  ],status:'已上线'},
   {version:'v3.18',date:'2026-08-25',modules:['账本'],items:[
     '「记一笔」备注支持快捷选择：内置 早饭 / 午饭 / 晚饭 一键填入，再点一次即清空；支持添加自定义快捷备注（如夜宵、打车、咖啡），可随时删除',
     '自定义快捷备注随云同步跨设备保留（任一端添加即合并）',
@@ -2984,7 +3138,7 @@ function mergeState(remote){
     });
     /* 字段级深度合并（同 id 时远端非空字段覆盖本地）—— 修复学习心得/答案/详情等不同步
        plans 嵌套复杂（milestones>tasks），保留 unionArr 即可 */
-    mergeItemsFields(S.learning.contents,remote.learning.contents,['name','kind','note','notes','notesSymbol','url','directionId','nodeId','parentId']);
+    mergeItemsFields(S.learning.contents,remote.learning.contents,['name','kind','note','notes','notesSymbol','url','directionId','nodeId','parentId','tags','mastered']);
     mergeItemsFields(S.learning.questions,remote.learning.questions,['title','detail','status','answer','tags','hard','solvedAt','directionId','contentId','nodeId']);
     mergeItemsFields(S.learning.directions,remote.learning.directions,['name','description','active','color']);
     mergeItemsFields(S.learning.reviews,remote.learning.reviews,['refType','refId','directionId','nodeId','due','done','note']);
@@ -3872,7 +4026,10 @@ if((!currentProfile()||!sessionPasscode)&&S.todos.length===0&&S.habits.length===
 }
 
 /* ============ 学习模块 ============ */
-function lnData(){if(!S.learning)S.learning={directions:[],contents:[],plans:[],questions:[],reviews:[],mistakes:[],selftests:[]};['directions','contents','plans','questions','reviews','mistakes','selftests'].forEach(k=>{if(!Array.isArray(S.learning[k]))S.learning[k]=[]});return S.learning}
+function lnData(){if(!S.learning)S.learning={directions:[],contents:[],plans:[],questions:[],reviews:[],mistakes:[],selftests:[]};['directions','contents','plans','questions','reviews','mistakes','selftests'].forEach(k=>{if(!Array.isArray(S.learning[k]))S.learning[k]=[]});
+  // v3.20.6: 老数据 order 迁移自动触发（修复 v3.20.2 的 orderBase-idx 反向编码遗留）
+  if(!S.learning._orderMigrated){migrateLearningOrdering(S.learning,false);S.learning._orderMigrated=true;persist()}
+  return S.learning}
 /* 判断一条记录的 nodeId 是否属于目标节点（支持 plan / ms / task 三级向上聚合） */
 function lnNodeMatches(cNodeId,targetNodeId,L0){
   if(!cNodeId||!targetNodeId)return false;
@@ -3895,6 +4052,11 @@ function lnNodeMatches(cNodeId,targetNodeId,L0){
   }
   return false;
 }
+/* 取某 task 精确绑定的内容（不含阶段聚合），用于任务行统计；review 走原聚合（点进 task 才看） */
+function lnTaskItems(L0,taskId){return {
+  contents:L0.contents.filter(c=>c.nodeId===taskId),
+  questions:L0.questions.filter(q=>q.nodeId===taskId)
+}}
 /* 取某节点（plan / milestone / task）下的全部关联记录 */
 function lnNodeItems(L0,nodeId){return {
   contents:L0.contents.filter(c=>lnNodeMatches(c.nodeId,nodeId,L0)),
@@ -3927,7 +4089,7 @@ function lnNodeOptions(L0,dirId){
     out.push({value:`plan:${p.id}`,label:`计划：${p.title}`});
     (p.milestones||[]).forEach(m=>{
       out.push({value:`ms:${m.id}`,label:`阶段：${p.title} / ${m.title||'未命名阶段'}`});
-      (m.tasks||[]).forEach(t=>{out.push({value:t.id,label:`任务：${p.title} / ${m.title||'阶段'} / ${t.title||'未命名任务'}`})});
+      (m.tasks||[]).forEach(t=>{out.push({value:t.id,label:`任务：${p.title} / ${m.title||'阶段'} / ${t.title||'未��名任务'}`})});
     });
   });
   return out;
@@ -3942,6 +4104,7 @@ let lnNode=null; /* {dirId,planId,msId,taskId} 当前打开的计划节点（任
 let lnNodeTab='items';
 let lnDetailTab='plans';
 let lnKbKw='';
+let lnKbTag='';
 let lnPlanDraft=null;
 function renderLearning(){lnData();if(lnNode)renderLnNodeView();else if(lnCurrentDir)renderLnDetail();else renderLnHome();}
 function lnRefresh(){if(lnNode)renderLnNodeView();else if(lnCurrentDir)renderLnDetail();else renderLnHome();}
@@ -3954,18 +4117,20 @@ function renderLnHome(){
   let html='';
   if(!L0.directions.length)html='<div class="ln-empty">还没有学习方向，点下方按钮新建。</div>';
   L0.directions.forEach(d=>{html+=renderLnHomeCard(d,L0)});
+  html+='<button class="ln-add-btn" onclick="openLnOutlineImport()">📥 粘贴大纲自动导入</button>';
   html+='<button class="ln-add-btn" onclick="openLnDirModal()">+ 新建学习方向</button>';
   $('#lnBody').innerHTML=html;
 }
 function renderLnHomeCard(d,L0){
   const st=lnDirStats(d,L0);const pct=st.total?Math.round(st.done/st.total*100):0;const col=d.color||'#888';
-  return `<div class="card ln-home-card" style="box-shadow:inset 4px 0 0 ${col}" onclick="lnOpenDir('${d.id}')">
+  // v3.20.3: 用 data-dir-id + addEventListener 事件委托替代 inline onclick（防 iOS PWA 缓存断链）
+  return `<div class="card ln-home-card" data-dir-id="${d.id}" tabindex="0" role="button" aria-label="进入方向 ${esc(d.name)}" style="box-shadow:inset 4px 0 0 ${col}">
     <div class="ln-dir-head" style="background:${hexA(col,.06)};border-radius:var(--r-sm)">
       <span class="ln-dot" style="background:${col};margin-top:4px"></span>
       <div class="ln-main">
         <div class="ln-title">${esc(d.name)} ${d.active?'':'<span class="ln-tag">已停用</span>'}</div>
-        <div class="ln-sub">${d.desc?esc(d.desc)+' · ':''}${st.cnt}内容 · ${st.plans}计划 · ${st.qTotal}问题 · ${st.qOpen}未解决 · ${st.dueR}待复习</div>
-        ${st.total?`<div class="ln-bar"><i style="width:${pct}%;background:${col}"></i></div>`:''}
+        <div class="ln-sub">${d.desc?esc(d.desc)+' · ':''}${st.kpTotal?('知识点 '+st.kpDone+'/'+st.kpTotal+' · '):''}${st.cnt}内容 · ${st.plans}计划 · ${st.qTotal}问题 · ${st.qOpen}未解决 · ${st.dueR}待复习</div>
+        ${st.kpTotal?`<div class="ln-bar" title="知识点掌握率"><i style="width:${Math.round(st.kpDone/st.kpTotal*100)}%;background:${col}"></i></div>`:(st.total?`<div class="ln-bar"><i style="width:${pct}%;background:${col}"></i></div>`:'')}
       </div>
       <div class="ln-dir-arrow">›</div>
     </div>
@@ -4018,6 +4183,8 @@ function renderLnOverview(){
 }
 function lnDirStats(d,L0){
   const cnt=L0.contents.filter(c=>c.directionId===d.id).length;
+  const kps=L0.contents.filter(c=>c.directionId===d.id&&c.kind==='kp');
+  const kpDone=kps.filter(c=>!!c.mastered).length;
   const plans=L0.plans.filter(p=>p.directionId===d.id);
   const tasks=plans.flatMap(p=>(p.milestones||[]).flatMap(m=>(m.tasks||[])));
   const done=tasks.filter(t=>t.done).length;
@@ -4025,7 +4192,7 @@ function lnDirStats(d,L0){
   const qTotal=L0.questions.filter(q=>q.directionId===d.id).length;
   const qOpen=L0.questions.filter(q=>q.directionId===d.id&&q.status!=='solved').length;
   const dueR=L0.reviews.filter(r=>r.directionId===d.id&&r.due<=todayStr()).length;
-  return {cnt,plans:plans.length,done,total,qTotal,qOpen,dueR};
+  return {cnt,kpTotal:kps.length,kpDone,plans:plans.length,done,total,qTotal,qOpen,dueR};
 }
 function lnConfirm(msg,cb){modal(`<h4>确认<span class="modal-close" onclick="closeModal()">×</span></h4><p style="color:var(--text-2)">${msg}</p><div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="ok" id="lnCfm" style="background:var(--bad)">删除</button></div>`,{noMaskClose:true});$('#lnCfm').onclick=()=>{closeModal();cb()}}
 /* —— 方向 —— */
@@ -4077,12 +4244,19 @@ function renderLnDirPlans(d,L0){
 }
 function renderLnPlanMilestones(p,L0){
   if(!(p.milestones||[]).length)return '<div class="muted" style="font-size:12px">暂无阶段，点击编辑添加。</div>';
-  return (p.milestones||[]).map(m=>{
-    const tasks=(m.tasks||[]).map(t=>{
-      const ni=lnNodeItems(L0,t.id);const cnts=[];
+  // v3.20.2: 优先按 order 排序（新数据有 order=大纲顺序），fallback 到原数组顺序（旧数据）
+  const _msAll=p.milestones||[];
+  const _msHasOrder=_msAll.length&&_msAll.every(m=>typeof m.order==='number');
+  const _msSorted=_msHasOrder?lnFifo(_msAll,'order'):_msAll;
+  return _msSorted.map(m=>{
+    const _tAll=m.tasks||[];
+    const _tHasOrder=_tAll.length&&_tAll.every(t=>typeof t.order==='number');
+    const _tSorted=_tHasOrder?lnFifo(_tAll,'order'):_tAll;
+    const tasks=_tSorted.map(t=>{
+      // v3.20.8: 任务行资料数只看精确绑定到该 task 的内容（不再被同 ms 的 topic 污染）
+      const ni=lnTaskItems(L0,t.id);const cnts=[];
       if(ni.contents.length)cnts.push('📄'+ni.contents.length);
       if(ni.questions.length)cnts.push('💡'+ni.questions.length);
-      if(ni.reviews.length)cnts.push('🔁'+ni.reviews.length);
       const cntHtml=cnts.length?`<span class="ln-task-cnt">${cnts.join(' ')}</span>`:'';
       return `<div class="ln-task ln-task-node" onclick="lnOpenNode('${p.directionId}','${p.id}','${m.id}','${t.id}')" title="点此查看该节点下的全部资料">
         <input type="checkbox" ${t.done?'checked':''} onclick="event.stopPropagation()" onchange="lnToggleTask('${p.id}','${m.id}','${t.id}',this.checked)">
@@ -4109,6 +4283,46 @@ function openLnPlanModal(dirId,id){
 function lnPlanCommit(){
   if(!lnPlanDraft.title.trim()){toast('请填写计划标题');return false}
   const L0b=lnData();
+  // v3.20.8: 同步建/删 content 跨模块强关联——plan 是其他模块的源
+  const oldPlan=lnPlanDraft.id?L0b.plans.find(x=>x.id===lnPlanDraft.id):null;
+  const oldMsIds={};(oldPlan?(oldPlan.milestones||[]):[]).forEach(m=>{oldMsIds[m.id]=m});
+  const oldTaskIds={};Object.values(oldMsIds).forEach(m=>{(m.tasks||[]).forEach(t=>{oldTaskIds[t.id]=t;});});
+  const newMsIds={};(lnPlanDraft.milestones||[]).forEach(m=>{newMsIds[m.id]=m;});
+  const newTaskIds={};Object.values(newMsIds).forEach(m=>{(m.tasks||[]).forEach(t=>{newTaskIds[t.id]=t;});});
+  // 1) 新增的 ms：建对应 topic content（nodeId=ms:${msId}）
+  Object.keys(newMsIds).forEach(msId=>{
+    if(!oldMsIds[msId]){
+      const m=newMsIds[msId];
+      const sameKind=L0b.contents.filter(c=>c.directionId===lnPlanDraft.directionId&&c.kind==='topic');
+      const maxOrder=sameKind.reduce((mx,c)=>Math.max(mx,typeof c.order==='number'?c.order:-1),-1);
+      L0b.contents.push({id:uid(),name:m.title||'未命名阶段',directionId:lnPlanDraft.directionId,kind:'topic',nodeId:`ms:${msId}`,tags:[],url:'',note:'',notes:'',order:maxOrder+1,createdAt:todayStr()});
+    }
+  });
+  // 2) 删除的 ms：删对应 topic content + 它的 kp 子内容
+  Object.keys(oldMsIds).forEach(msId=>{
+    if(!newMsIds[msId]){
+      L0b.contents=L0b.contents.filter(c=>!(c.kind==='topic'&&c.nodeId===`ms:${msId}`));
+      L0b.contents=L0b.contents.filter(c=>!((c.kind==='kp'||c.kind==='resource')&&c.nodeId&&c.nodeId.startsWith('ms:')&&c.nodeId===`ms:${msId}`));
+    }
+  });
+  // 3) 新增的 task：建对应 kp content（nodeId=taskId，parentId=该 ms 对应 topic）
+  Object.keys(newTaskIds).forEach(taskId=>{
+    if(!oldTaskIds[taskId]){
+      const t=newTaskIds[taskId];
+      // 找该 task 所在 ms 对应的 topic
+      let msId=null;Object.keys(newMsIds).forEach(mid=>{if((newMsIds[mid].tasks||[]).some(x=>x.id===taskId))msId=mid;});
+      const topic=msId?L0b.contents.find(c=>c.kind==='topic'&&c.nodeId===`ms:${msId}`):null;
+      const sameKind=L0b.contents.filter(c=>c.directionId===lnPlanDraft.directionId&&c.kind==='kp');
+      const maxOrder=sameKind.reduce((mx,c)=>Math.max(mx,typeof c.order==='number'?c.order:-1),-1);
+      L0b.contents.push({id:uid(),name:t.title||'未命名任务',directionId:lnPlanDraft.directionId,kind:'kp',nodeId:taskId,parentId:topic?topic.id:null,tags:[],mastered:false,url:'',note:'',notes:'',order:maxOrder+1,createdAt:todayStr()});
+    }
+  });
+  // 4) 删除的 task：删对应 kp content（精确 taskId 匹配）
+  Object.keys(oldTaskIds).forEach(taskId=>{
+    if(!newTaskIds[taskId]){
+      L0b.contents=L0b.contents.filter(c=>!(c.kind==='kp'&&c.nodeId===taskId));
+    }
+  });
   if(lnPlanDraft.id&&L0b.plans.find(x=>x.id===lnPlanDraft.id)){const i=L0b.plans.findIndex(x=>x.id===lnPlanDraft.id);L0b.plans[i]=lnPlanDraft;}
   else L0b.plans.unshift(lnPlanDraft);
   persist();lnRefresh();
@@ -4121,7 +4335,7 @@ function renderLnPlanModal(){
     let tasksHtml=(m.tasks||[]).map((t,ti)=>`<div class="ln-task"><input type="checkbox" ${t.done?'checked':''} onchange="lnPlanTaskDone(${mi},${ti},this.checked)"><input class="ln-task-t" value="${esc(t.title)}" oninput="lnPlanTaskTitle(${mi},${ti},this.value)" placeholder="任务内容" style="border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 8px;font:inherit;outline:none"><input type="date" value="${t.due||''}" onchange="lnPlanTaskDue(${mi},${ti},this.value)" style="border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 8px;font:inherit"><button onclick="lnPlanDelTask(${mi},${ti})" style="border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:5px 9px;color:var(--bad)">×</button></div>`).join('')||'<div class="muted" style="font-size:12px">暂无任务</div>';
     return `<div class="ln-card"><div class="ln-ms-top"><input class="ln-task-t" value="${esc(m.title)}" oninput="lnPlanMsTitle(${mi},this.value)" placeholder="阶段名称" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 8px;font:inherit;font-weight:600;outline:none"><input type="date" value="${m.due||''}" onchange="lnPlanMsDue(${mi},this.value)" style="border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 8px;font:inherit"><button onclick="lnPlanDelMs(${mi})" style="border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:6px 10px;color:var(--bad)">删除阶段</button></div>${tasksHtml}<button class="ln-add-btn" style="margin-top:4px" onclick="lnPlanAddTask(${mi})">+ 添加任务</button></div>`;
   }).join('');
-  modal(`<h4>${p.id&&L0.plans.find(x=>x.id===p.id)?'编辑计划':'新建计划'}<span class="modal-close" onclick="confirmClose(()=>{$('#lnPlanSave').click()})">×</span></h4>
+  modal(`<h4>${p.id&&L0.plans.find(x=>x.id===p.id)?'编辑���划':'新建计划'}<span class="modal-close" onclick="confirmClose(()=>{$('#lnPlanSave').click()})">×</span></h4>
     <div class="field"><span class="lab">方向</span><select id="lnPlanDir">${dirOpts}</select></div>
     <div class="field"><span class="lab">标题</span><input id="lnPlanTitle" value="${esc(p.title)}" placeholder="计划标题，如「Python 入门 30 天"></div>
     <div class="ln-ms">阶段与任务</div>
@@ -4155,7 +4369,22 @@ function saveLnSecCollapsed(){try{localStorage.setItem('ln_sec_collapsed',JSON.s
 function toggleLnSec(key){ if(!key)return; lnSecCollapsed[key]=!lnSecCollapsed[key]; if(!lnSecCollapsed[key]) delete lnSecCollapsed[key]; saveLnSecCollapsed(); lnRefresh(); }
 function isLnSecOpen(key){ return !lnSecCollapsed[key]; }
 /* FIFO 排序：createdAt 升序，相同时按 id 升序兜底；无 createdAt 时按原顺序。FIFO 是默认行为，括号内可传主排序字段如 'due'/'date' */
-function lnFifo(arr,byKey){byKey=byKey||'createdAt';return arr.slice().sort((a,b)=>{const ak=(a[byKey]||''),bk=(b[byKey]||'');if(ak&&bk)return ak.localeCompare(bk)||String(a.id||'').localeCompare(String(b.id||''));if(ak&&!bk)return -1;if(!ak&&bk)return 1;return String((a.id||'')).localeCompare(String((b.id||'')))});}
+// v3.20.5: 数字字段必须走数值比较（order 等），否则 '10000' < '9999' 字典序会让倒序乱排
+function lnFifo(arr,byKey){
+  byKey=byKey||'createdAt';
+  return arr.slice().sort((a,b)=>{
+    const av=a[byKey],bv=b[byKey];
+    // 数字字段（如 order）走数值比较；失效再退回字符串
+    if(typeof av==='number' && typeof bv==='number' && !isNaN(av) && !isNaN(bv)){
+      return av-bv || String(a.id||'').localeCompare(String(b.id||''));
+    }
+    const ak=String(av??''),bk=String(bv??'');
+    if(ak&&bk)return ak.localeCompare(bk)||String(a.id||'').localeCompare(String(b.id||''));
+    if(ak&&!bk)return -1;
+    if(!ak&&bk)return 1;
+    return String(a.id||'').localeCompare(String(b.id||''));
+  });
+}
 /* 渲染带"折叠标题 + 内容"的学习区段。key 唯一标识一个区段（建议 'dirId|tab|sec'），默认展开。 */
 function lnSecHtml(key,titleHtml,bodyHtml){
   const open=isLnSecOpen(key);
@@ -4179,19 +4408,26 @@ function lnNotesHtml(c,mode){
 function lnQuickAddChild(dirId,parentId){ const L0=lnData(); const p=L0.contents.find(c=>c.id===parentId); openLnContentModal(p?p.directionId:dirId,null,null,parentId); }
 function lnContentListHtml(L0,dirId,parentId,depth){
   depth=depth||0; if(depth>12) return '';
-  const kids=lnFifo(L0.contents.filter(c=>c.directionId===dirId&&(c.parentId||null)===parentId),'createdAt');
+  // v3.20.2: 优先按 order 排序（新导入数据有 order=大纲绝对顺序），fallback 到 createdAt（旧数据）
+  const _all=L0.contents.filter(c=>c.directionId===dirId&&(c.parentId||null)===parentId);
+  const _hasOrder=_all.length&&_all.every(c=>typeof c.order==='number');
+  const kids=_hasOrder?lnFifo(_all,'order'):lnFifo(_all,'createdAt');
   if(!kids.length) return '';
   return kids.map(c=>{
     const isTopic=c.kind==='topic';
+    const isKp=c.kind==='kp';
     const hasKids=L0.contents.some(x=>x.directionId===dirId&&(x.parentId||null)===c.id);
     const open=!lnTopicCollapsed[c.id];
-    const indent=10*depth;
+    const isChild=depth>0;
     const hasNotes=c.notes&&c.notes.trim();
     const notesTag=hasNotes?`<span class="ln-tag" style="cursor:pointer" onclick="lnToggleNotes('${c.id}')" title="点击查看学习心得">心得</span>`:'';
-    let h=`<div class="card" style="margin-top:8px;margin-left:${indent}px"><div class="ln-item" style="border:none;padding:0">`;
-    h+= (isTopic&&hasKids) ? `<span class="ln-caret" onclick="lnToggleTopic('${c.id}')">${open?'▼':'▶'}</span>` : `<span class="ln-caret-ph"></span>`;
-    h+=`<div class="ln-main"><div class="ln-title">${esc(c.name)} <span class="ln-tag">${isTopic?'子主题':'资料'}</span>${notesTag}</div><div class="ln-sub">${c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> · `:''}${c.note?esc(c.note):'无备注'}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button>${isTopic?`<button onclick="lnQuickAddChild('${c.directionId}','${c.id}')">+ 子内容</button>`:''}<button onclick="addReview('content','${c.id}','${c.directionId}')">复习</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`;
-    if(isTopic&&hasKids&&open) h+=lnContentListHtml(L0,dirId,c.id,depth+1);
+    const tags=(c.tags||[]).map(t=>`<span class="ln-tag">#${esc(t)}</span>`).join('');
+    const kindName=isTopic?'主题':(isKp?'知识点':'资料');
+    const state=isKp?`<span class="ln-kp-state">${c.mastered?'已掌握':'未掌握'}</span>`:'';
+    let h=`<div class="card ${isKp?'ln-kp':''} ${isKp&&c.mastered?'done':''} ${isChild?(c.kind==='resource'?'ln-tree-child ln-res-child':'ln-tree-child'):''}" style="margin-top:${isChild?6:8}px"><div class="ln-item" style="border:none;padding:0">`;
+    h+= hasKids ? `<span class="ln-caret" onclick="lnToggleTopic('${c.id}')">${open?'▼':'▶'}</span>` : `<span class="ln-caret-ph"></span>`;
+    h+=`<div class="ln-main"><div class="ln-title">${esc(c.name)} <span class="ln-tag">${kindName}</span>${state}${notesTag}</div><div class="ln-sub">${tags?tags+' · ':''}${c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> · `:''}${c.note?esc(c.note):'无备注'}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button>${!isKp?`<button onclick="lnQuickAddChild('${c.directionId}','${c.id}')">+ 子内容</button>`:''}${isKp?`<button onclick="lnToggleMastered('${c.id}')">${c.mastered?'标未掌握':'标掌握'}</button>`:''}<button onclick="addReview('content','${c.id}','${c.directionId}')">复习</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`;
+    if(hasKids&&open) h+=lnContentListHtml(L0,dirId,c.id,depth+1);
     return h;
   }).join('');
 }
@@ -4209,12 +4445,15 @@ function lnNodeContentsHtml(L0,roots,hit,depth){
   depth=depth||0; if(depth>12) return '';
   return roots.map(c=>{
     const isTopic=c.kind==='topic';
-    const indent=10*depth;
+    const isChild=depth>0;
+    const kids=L0.contents.filter(x=>(x.parentId||null)===c.id&&hit.has(x.id));
+    const hasKids=kids.length>0;
+    const open=!lnTopicCollapsed[c.id];
     const hasNotes=c.notes&&c.notes.trim();
     const notesTag=hasNotes?`<span class="ln-tag" style="cursor:pointer" onclick="lnToggleNotes('${c.id}')" title="点击查看学习心得">心得</span>`:'';
-    let h=`<div class="card" style="margin-top:8px;margin-left:${indent}px"><div class="ln-item" style="border:none;padding:0"><span class="ln-caret-ph"></span><div class="ln-main"><div class="ln-title">${esc(c.name)} <span class="ln-tag">${isTopic?'子主题':'资料'}</span>${notesTag}</div><div class="ln-sub">${c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> · `:''}${c.note?esc(c.note):'无备注'}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button><button onclick="addReview('content','${c.id}','${c.directionId}')">复习</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`;
-    const kids=lnFifo(L0.contents.filter(x=>(x.parentId||null)===c.id&&hit.has(x.id)),'createdAt');
-    if(kids.length) h+=lnNodeContentsHtml(L0,kids,hit,depth+1);
+    const caret=hasKids?`<span class="ln-caret" onclick="lnToggleTopic('${c.id}')" title="点击折叠/展开子节点">${open?'▼':'▶'}</span>`:`<span class="ln-caret-ph"></span>`;
+    let h=`<div class="card ${isChild?'ln-tree-child':''}" style="margin-top:${isChild?6:8}px"><div class="ln-item" style="border:none;padding:0">${caret}<div class="ln-main"><div class="ln-title">${esc(c.name)} <span class="ln-tag">${isTopic?'子主题':'资料'}</span>${notesTag}</div><div class="ln-sub">${c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> · `:''}${c.note?esc(c.note):'无备注'}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button><button onclick="addReview('content','${c.id}','${c.directionId}')">复习</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`;
+    if(hasKids&&open) h+=lnNodeContentsHtml(L0,lnFifo(kids,'order'),hit,depth+1);
     return h;
   }).join('');
 }
@@ -4223,10 +4462,16 @@ function renderLnDirContents(d,L0){
   const nodeOpts=lnNodeOptions(L0,d.id).map(o=>`<option value="${o.value}">${esc(o.label)}</option>`).join('');
   let html=`<div class="ln-quick">
     <input type="text" id="lnQcName_${d.id}" placeholder="资料/子主题名称，回车快速添加" onkeydown="if(event.key==='Enter')lnQuickAddContent('${d.id}')">
-    <select id="lnQcKind_${d.id}"><option value="resource">资料</option><option value="topic">子主题</option></select>
+    <select id="lnQcKind_${d.id}"><option value="kp">知识点</option><option value="topic">主题</option><option value="resource">资料</option></select>
     <select id="lnQcNode_${d.id}" title="关联节点">${nodeOpts}</select>
     <button onclick="lnQuickAddContent('${d.id}')">添加</button>
   </div>`;
+  // v3.20.8: 兜底——没有 parentId 的内容（多为用户手动加的 resource/sub-topic）归到 plan 第一个 topic
+  // 这样渲染时就不会单独飘出来形成"孤岛"
+  const firstTopic=L0.contents.filter(c=>c.directionId===d.id&&c.kind==='topic'&&(c.parentId||null)===null).sort((a,b)=>(a.order||0)-(b.order||0))[0];
+  if(firstTopic){
+    L0.contents.filter(c=>c.directionId===d.id&&(c.parentId||null)===null&&c.id!==firstTopic.id&&c.kind!=='topic').forEach(c=>{c.parentId=firstTopic.id;});
+  }
   const hasAny=L0.contents.some(c=>c.directionId===d.id);
   if(!hasAny){html+='<div class="ln-empty">还没有内容，上方快速添加。</div>';return html}
   const tree=lnContentListHtml(L0,d.id,null,0);
@@ -4236,10 +4481,26 @@ function renderLnDirContents(d,L0){
 function lnQuickAddContent(dirId,parentId){
   const name=$(`#lnQcName_${dirId}`).value.trim();if(!name){toast('请填写名称');return}
   const kind=$(`#lnQcKind_${dirId}`).value;const nodeId=$(`#lnQcNode_${dirId}`).value||null;const L0=lnData();
-  const obj={id:uid(),name,directionId:dirId,kind,nodeId,url:'',note:'',notes:'',createdAt:todayStr()};
-  if(parentId){obj.parentId=parentId;const p=L0.contents.find(c=>c.id===parentId);if(p&&!nodeId)obj.nodeId=p.nodeId||null;}
-  L0.contents.unshift(obj);persist();
-  lnCurrentDir=dirId;lnDetailTab='contents';lnRefresh();toast('已添加');
+  // v3.20.9: 强化父节点关联——没选 nodeId 的 resource/kp 必须归到 plan 第一个 topic（=归父）
+  let resolvedNode=nodeId,resolvedParent=parentId||null;
+  if(kind!=='topic'&&!resolvedNode){
+    const firstPlan=lnFifo(L0.plans.filter(p=>p.directionId===dirId),'order')[0];
+    const firstMs=firstPlan?lnFifo(firstPlan.milestones||[],'order')[0]:null;
+    const firstTopic=firstMs?L0.contents.find(c=>c.directionId===dirId&&c.kind==='topic'&&c.nodeId==='ms:'+firstMs.id):null;
+    if(firstTopic){resolvedParent=firstTopic.id;resolvedNode=firstMs?`ms:${firstMs.id}`:null;}
+    else toast('请选择「关联节点」');
+  }
+  if(parentId&&!resolvedNode){
+    const p=L0.contents.find(c=>c.id===parentId);
+    if(p&&p.nodeId)resolvedNode=p.nodeId;
+  }
+  // v3.20.8: order 字段按当前同类内容最后+1（保证新加内容在末尾，不乱序）
+  const sameKind=L0.contents.filter(c=>c.directionId===dirId&&c.kind===kind);
+  const maxOrder=sameKind.reduce((mx,c)=>Math.max(mx,typeof c.order==='number'?c.order:-1),-1);
+  const obj={id:uid(),name,directionId:dirId,kind,nodeId:resolvedNode,parentId:resolvedParent,url:'',note:'',notes:'',tags:[],mastered:false,order:maxOrder+1,createdAt:todayStr()};
+  // v3.20.9: push 到尾而非 unshift，配合 order 字段，新加项应当按业务排（不抢已有顺序）
+  L0.contents.push(obj);persist();
+  lnCurrentDir=dirId;lnDetailTab='contents';lnRefresh();toast('已添加，已归到父节点下');
 }
 function openLnContentModal(dirId,id,nodeId,parentId){
   const L0=lnData();const c=id?L0.contents.find(x=>x.id===id):null;const selDir=c?c.directionId:(dirId||'');
@@ -4253,13 +4514,15 @@ function openLnContentModal(dirId,id,nodeId,parentId){
   }
   const nodeOpts=lnNodeOptions(L0,selDir).map(o=>`<option value="${o.value}" ${selNode===o.value?'selected':''}>${esc(o.label)}</option>`).join('');
   modal(`<h4>${c?'编辑内容':'添加学习内容'}<span class="modal-close" onclick="closeModal()">×</span></h4>
-    <div class="ln-seg" id="lnCtKind"><button data-k="resource" class="${kind==='resource'?'on':''}">资料（书/课/链接）</button><button data-k="topic" class="${kind==='topic'?'on':''}">子主题</button></div>
+    <div class="ln-seg" id="lnCtKind"><button data-k="kp" class="${kind==='kp'?'on':''}">知识点</button><button data-k="topic" class="${kind==='topic'?'on':''}">主题</button><button data-k="resource" class="${kind==='resource'?'on':''}">资料</button></div>
     <div class="field"><span class="lab">方向</span><select id="lnCtDir">${dirOpts}</select></div>
     <div class="field"><span class="lab">归属父主题</span><select id="lnCtParent">${parentOptsHtml(selDir,id,selParent)}</select></div>
     <div class="field"><span class="lab">关联节点</span><select id="lnCtNode">${nodeOpts}</select></div>
     <div class="field"><span class="lab">名称</span><input id="lnCtName" value="${c?esc(c.name):''}" placeholder="如《流畅的Python》/ 基础语法"></div>
     <div class="field"><span class="lab">链接</span><input id="lnCtUrl" value="${c?esc(c.url||''):''}" placeholder="选填，资料链接"></div>
     <div class="field"><span class="lab">备注</span><input id="lnCtNote" value="${c?esc(c.note||''):''}" placeholder="一句话备注"></div>
+    <div class="field"><span class="lab">标签</span><input id="lnCtTags" value="${c?esc((c.tags||[]).join(', ')):''}" placeholder="选填，如 SPD, 耗材, 流程（逗号分隔）"></div>
+    <div class="field"><span class="lab">掌握</span><select id="lnCtMastered"><option value="0" ${!c||!c.mastered?'selected':''}>未掌握</option><option value="1" ${c&&c.mastered?'selected':''}>已掌握</option></select></div>
     <div class="field" style="flex-direction:column;align-items:stretch"><span class="lab" style="margin-top:4px">学习心得</span>${lnNotesEditorHtml(c?c.notes||'':'',c?c.notesSymbol:'')}</div>
     <div class="btns"><button class="cancel" onclick="lnConfirmClose(()=>{$('#lnCtSave').click()})">关闭</button><button class="ok" id="lnCtSave">保存</button></div>`,{noMaskClose:true});
   $('#modalBox').classList.add('wide');
@@ -4269,8 +4532,23 @@ function openLnContentModal(dirId,id,nodeId,parentId){
   $('#lnCtDir').onchange=e=>{const did=e.target.value;$('#lnCtNode').innerHTML=lnNodeOptions(L0,did).map(o=>`<option value="${o.value}">${esc(o.label)}</option>`).join('');$('#lnCtParent').innerHTML=parentOptsHtml(did,id,$('#lnCtParent').value)};
   function lnContentCommit(){
     const name=$('#lnCtName').value.trim();if(!name){toast('请填写名称');return false}
-    const obj={name,directionId:$('#lnCtDir').value||null,kind:k,url:$('#lnCtUrl').value.trim(),note:$('#lnCtNote').value.trim(),notes:serializeNotesEntries(),notesSymbol:_lnCurrentSymbol,nodeId:$('#lnCtNode').value||null,parentId:$('#lnCtParent').value||null};
-    if(c){Object.assign(c,obj);}else{L0.contents.unshift(Object.assign({id:uid(),createdAt:todayStr(),notes:''},obj));}
+    // v3.20.9: 新增内容强关联——没填节点时强制归到 plan 第一个 topic
+    let nodeId=$('#lnCtNode').value||null,parentId=$('#lnCtParent').value||null;
+    if(!c&&k!=='topic'&&!nodeId){
+      const dirId=$('#lnCtDir').value;const L0tmp=lnData();
+      const firstPlan=lnFifo(L0tmp.plans.filter(p=>p.directionId===dirId),'order')[0];
+      const firstMs=firstPlan?lnFifo(firstPlan.milestones||[],'order')[0]:null;
+      const firstTopic=firstMs?L0tmp.contents.find(x=>x.directionId===dirId&&x.kind==='topic'&&x.nodeId==='ms:'+firstMs.id):null;
+      if(firstTopic){parentId=firstTopic.id;nodeId=firstMs?`ms:${firstMs.id}`:null;}
+    }
+    const obj={name,directionId:$('#lnCtDir').value||null,kind:k,url:$('#lnCtUrl').value.trim(),note:$('#lnCtNote').value.trim(),tags:splitTags($('#lnCtTags').value),mastered:$('#lnCtMastered').value==='1',notes:serializeNotesEntries(),notesSymbol:_lnCurrentSymbol,nodeId,parentId};
+    if(c){Object.assign(c,obj);}
+    else{
+      // v3.20.8: 新加内容时按同类内容最后 order+1 设 order，避免乱序
+      const sameKind=L0.contents.filter(x=>x.directionId===obj.directionId&&x.kind===k);
+      const maxOrder=sameKind.reduce((mx,x)=>Math.max(mx,typeof x.order==='number'?x.order:-1),-1);
+      L0.contents.push(Object.assign({id:uid(),createdAt:todayStr(),notes:'',order:maxOrder+1},obj));
+    }
     persist();lnRefresh();
     return true;
   }
@@ -4342,16 +4620,338 @@ function openLnQuestionModal(id,nodeId,dirId){
 function lnCycleStatus(id){const L0=lnData();const q=L0.questions.find(x=>x.id===id);if(!q)return;const order=['open','doing','solved'];let i=order.indexOf(q.status);i=(i+1)%3;q.status=order[i];if(q.status==='solved'&&!q.solvedAt)q.solvedAt=todayStr();if(q.status!=='solved')q.solvedAt=null;persist();lnRefresh()}
 function lnDelQuestion(id){lnConfirm('确定删除该问题？',()=>{const L0=lnData();L0.questions=L0.questions.filter(x=>x.id!==id);persist();lnRefresh()})}
 /* —— 知识库 —— */
+/* v3.20.9: 知识库加折叠 + 资源归到对应主题（无 parentId 的资源自动归到 plan 第一个 topic），绝不孤岛 */
 function renderLnDirKb(d,L0){
-  let list=lnFifo(L0.questions.filter(q=>q.directionId===d.id&&q.status==='solved'&&q.answer&&q.answer.trim()));
-  if(lnKbKw)list=list.filter(q=>(q.title+' '+q.answer+' '+(q.tags||[]).join(' ')).toLowerCase().includes(lnKbKw.toLowerCase()));
-  let html=`<div class="ln-quick"><input type="text" id="lnKbKw" placeholder="搜索知识库" value="${esc(lnKbKw)}" oninput="lnKbKw=this.value;renderLnDetail()"></div>`;
-  if(!list.length){html+='<div class="ln-empty">还没有沉淀知识。<br>把问题标记为已解决并填写答案后会自动出现在这里。</div>';return html}
-  list.forEach(q=>{
-    const tags=(q.tags||[]).map(t=>`<span class="ln-tag">${esc(t)}</span>`).join('');
-    html+=`<div class="card" style="margin-top:8px"><div class="ln-title">${esc(q.title)}</div><div class="ln-sub">${tags?tags+' · ':''}解决于 ${q.solvedAt||'—'}</div><div class="ln-kb-a"><b>答案：</b>${esc(q.answer)}</div></div>`;
-  });
+  const tagSet=new Set();
+  L0.contents.filter(c=>c.directionId===d.id).forEach(c=>(c.tags||[]).forEach(t=>tagSet.add(t)));
+  L0.questions.filter(q=>q.directionId===d.id).forEach(q=>(q.tags||[]).forEach(t=>tagSet.add(t)));
+  const tags=[...tagSet].sort((a,b)=>a.localeCompare(b));
+  let html=`<div class="ln-quick"><input type="text" id="lnKbKw" placeholder="搜索知识点 / 笔记 / 已解决问题" value="${esc(lnKbKw)}" oninput="lnKbKw=this.value;renderLnDetail()"><button onclick="lnKbKw='';lnKbTag='';renderLnDetail()">重置</button></div>`;
+  if(tags.length) html+=`<div class="ln-kb-filters"><button class="ln-kb-chip ${!lnKbTag?'on':''}" onclick="lnKbTag='';renderLnDetail()">全部标签</button>${tags.map(t=>`<button class="ln-kb-chip ${lnKbTag===t?'on':''}" onclick="lnKbTag='${esc(t)}';renderLnDetail()">#${esc(t)}</button>`).join('')}</div>`;
+  const hit=lnKbHitSet(L0,d.id,lnKbKw,lnKbTag);
+  // v3.20.9：把没 parentId 的 resource 自动归到 plan 第一个 topic 树里，跟主题/知识点一起渲染
+  const firstTopicId=(function(){
+    const p=lnFifo(L0.plans.filter(x=>x.directionId===d.id),'order')[0];
+    if(!p)return null;
+    const ms=lnFifo(p.milestones||[],'order')[0];
+    if(!ms)return null;
+    return L0.contents.find(c=>c.directionId===d.id&&c.kind==='topic'&&c.nodeId==='ms:'+ms.id)?.id || null;
+  })();
+  const roots=lnFifo(L0.contents.filter(c=>c.directionId===d.id&&hit.has(c.id)&&(!c.parentId||!hit.has(c.parentId))&&c.kind!=='resource'),'order');
+  if(roots.length){
+    html+=`<div class="ln-ms">主题树 / 知识点 <span style="font-weight:normal;font-size:11px;color:var(--text-3);cursor:pointer;margin-left:8px" onclick="lnKbToggleAll(this,'kb')">展开/折叠全部</span></div>`+lnKbTreeHtml(L0,d.id,roots,hit,0);
+  }
+  // 资源单独按父节点（一级 topic）分组渲染，支持折叠
+  const resources=lnFifo(L0.contents.filter(c=>c.directionId===d.id&&c.kind==='resource'&&hit.has(c.id)),'order');
+  if(resources.length){
+    html+=`<div class="ln-ms">资源 <span style="font-weight:normal;font-size:11px;color:var(--text-3);cursor:pointer;margin-left:8px" onclick="lnKbToggleAll(this,'res')">展开/折叠全部</span></div>`;
+    // 按 parentId 分组（无 parentId 的归到「未分组」）
+    const groups=new Map();
+    resources.forEach(r=>{
+      const pid=r.parentId||(firstTopicId?('__ft__'):'__none__');
+      if(!groups.has(pid))groups.set(pid,[]);
+      groups.get(pid).push(r);
+    });
+    // 排序：归到具体 topic 的组排在前面，未分组的最后
+    const sortedKeys=[...groups.keys()].sort((a,b)=>{
+      const oa=a===firstTopicId?-1:(a==='__ft__'?0:1);
+      const ob=b===firstTopicId?-1:(b==='__ft__'?0:1);
+      return oa-ob;
+    });
+    sortedKeys.forEach(pid=>{
+      const items=groups.get(pid);
+      const labelTopic=pid===firstTopicId||pid==='__ft__'?'📘 '+lnFifo(L0.contents.filter(x=>x.directionId===d.id&&x.kind==='topic'&&x.id===firstTopicId),'order').map(x=>x.name).join(''):(pid==='__none__'?'⚠️ 未分组 (建议编辑关联)':(L0.contents.find(c=>c.id===pid)?.name||'未分组'));
+      const gKey='kb-res-'+pid;
+      html+=`<div class="card" style="margin-top:8px"><div class="ln-item" style="border:none;padding:0"><span class="ln-caret" data-kb-grp="${gKey}" onclick="lnKbToggleGrp(this)">▼</span><div class="ln-main"><div class="ln-title" style="font-size:13px">${esc(labelTopic||'资源组')} <span class="ln-tag" style="font-weight:500">📚${items.length}</span></div></div></div><div data-kb-grp-body="${gKey}">`;
+      items.forEach(c=>{
+        const hasNotes=c.notes&&c.notes.trim();
+        const notesTag=hasNotes?`<span class="ln-tag" style="cursor:pointer" onclick="lnToggleNotes('${c.id}')" title="点击查看学习心得">心得</span>`:'';
+        const tags=(c.tags||[]).map(t=>`<span class="ln-tag">#${esc(t)}</span>`).join('');
+        html+=`<div class="card ln-res-child" style="margin-top:6px"><div class="ln-item" style="border:none;padding:0"><span class="ln-caret-ph"></span><div class="ln-main"><div class="ln-title">${esc(c.name)} <span class="ln-tag" style="font-weight:500">资料</span>${notesTag}</div><div class="ln-sub">${tags?tags+' · ':''}${c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> · `:''}${c.note?esc(c.note):'无备注'} · ${c.createdAt||''}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`;
+      });
+      html+=`</div></div>`;
+    });
+  }
+  let qs=lnFifo(L0.questions.filter(q=>q.directionId===d.id&&q.status==='solved'&&q.answer&&q.answer.trim()));
+  if(lnKbKw){const k=lnKbKw.toLowerCase();qs=qs.filter(q=>(q.title+' '+q.answer+' '+(q.tags||[]).join(' ')).toLowerCase().includes(k));}
+  if(lnKbTag)qs=qs.filter(q=>(q.tags||[]).includes(lnKbTag));
+  if(qs.length){
+    html+=`<div class="ln-ms">已解决问题答案</div>`;
+    qs.forEach(q=>{const qt=(q.tags||[]).map(t=>`<span class="ln-tag">#${esc(t)}</span>`).join('');html+=`<div class="card" style="margin-top:8px"><div class="ln-title">${esc(q.title)}</div><div class="ln-sub">${qt?qt+' · ':''}解决于 ${q.solvedAt||'—'}</div><div class="ln-kb-a"><b>答案：</b>${esc(q.answer)}</div></div>`;});
+  }
+  if(!roots.length&&!resources.length&&!qs.length) html+='<div class="ln-empty">没有匹配内容。<br>可先在首页「粘贴大纲自动导入」，或在内容中给知识点加标签/心得。</div>';
   return html;
+}
+function lnKbToggleGrp(caret){
+  const key=caret.getAttribute('data-kb-grp');
+  const body=document.querySelector(`[data-kb-grp-body="${CSS.escape(key)}"]`);
+  if(!body)return;
+  const hidden=body.style.display==='none';
+  body.style.display=hidden?'':'none';
+  caret.textContent=hidden?'▼':'▶';
+}
+function lnKbToggleAll(btn,kind){
+  const sel=`[data-kb-grp-body]`;
+  const bodies=document.querySelectorAll(sel);
+  if(!bodies.length)return;
+  const allHidden=[...bodies].every(b=>b.style.display==='none');
+  bodies.forEach(b=>{
+    b.style.display=allHidden?'':'none';
+    const key=b.getAttribute('data-kb-grp-body');
+    const caret=document.querySelector(`[data-kb-grp="${CSS.escape(key)}"]`);
+    if(caret)caret.textContent=allHidden?'▼':'▶';
+  });
+}
+function splitTags(v){return String(v||'').split(/[，,#\s]+/).map(x=>x.trim()).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,12)}
+function lnToggleMastered(id){const L0=lnData();const c=L0.contents.find(x=>x.id===id);if(!c)return;c.mastered=!c.mastered;persist();lnRefresh();toast(c.mastered?'已标记掌握':'已标记未掌握')}
+function lnKbHitSet(L0,dirId,kw,tag){
+  const k=String(kw||'').toLowerCase();const hit=new Set();
+  L0.contents.filter(c=>c.directionId===dirId).forEach(c=>{
+    const text=(c.name+' '+(c.note||'')+' '+(c.notes||'')+' '+(c.tags||[]).join(' ')).toLowerCase();
+    const okKw=!k||text.includes(k);const okTag=!tag||(c.tags||[]).includes(tag);
+    if(okKw&&okTag)hit.add(c.id);
+  });
+  let changed=true;while(changed){changed=false;L0.contents.forEach(c=>{if(c.directionId===dirId&&c.parentId&&hit.has(c.id)&&!hit.has(c.parentId)){hit.add(c.parentId);changed=true;}})}
+  return hit;
+}
+function lnKbTreeHtml(L0,dirId,roots,hit,depth){
+  depth=depth||0;if(depth>12)return '';
+  return roots.map(c=>{
+    const kids=lnFifo(L0.contents.filter(x=>x.directionId===dirId&&(x.parentId||null)===c.id&&hit.has(x.id)),'order');
+    const isKp=c.kind==='kp';const isTopic=c.kind==='topic';
+    const isChild=depth>0;
+    const hasKids=kids.length>0;
+    const open=!lnTopicCollapsed[c.id];
+    const tags=(c.tags||[]).map(t=>`<span class="ln-tag">#${esc(t)}</span>`).join('');
+    const kind=isTopic?'主题':(isKp?'知识点':'资料');
+    // v3.20.10: 知识库主题树加真折叠按钮（之前是 ln-caret-ph 占位符，所有节点都不可折叠——用户反馈的 bug）
+    const caret=hasKids?`<span class="ln-caret" onclick="lnToggleTopic('${c.id}')" title="点击折叠/展开子节点">${open?'▼':'▶'}</span>`:`<span class="ln-caret-ph"></span>`;
+    let h=`<div class="card ${isKp?'ln-kp':''} ${isKp&&c.mastered?'done':''} ${isChild?'ln-tree-child':''}" style="margin-top:${isChild?6:8}px"><div class="ln-item" style="border:none;padding:0">${caret}<div class="ln-main"><div class="ln-title">${esc(c.name)} <span class="ln-tag">${kind}</span>${isKp?`<span class="ln-kp-state">${c.mastered?'已掌握':'未掌握'}</span>`:''}</div><div class="ln-sub">${tags?tags+' · ':''}${c.note?esc(c.note):'无备注'}</div>${c.notes?lnNotesHtml(c,'compact'):''}</div><div class="ln-acts">${isKp?`<button onclick="lnToggleMastered('${c.id}')">${c.mastered?'标未掌握':'标掌握'}</button>`:''}<button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button></div></div></div>`;
+    if(hasKids&&open)h+=lnKbTreeHtml(L0,dirId,kids,hit,depth+1);
+    return h;
+  }).join('');
+}
+function parseLnOutline(text){
+  const rows=[];String(text||'').split(/\r?\n/).forEach(raw=>{
+    if(!raw.trim())return;
+    const lead=(raw.match(/^\s*/)||[''])[0].replace(/\t/g,'    ').length;
+    let body=raw.trim().replace(/^([一二三四五六七八九十]+[、.．]|\d+(?:\.\d+)*[、.．]?|[-*•]+)\s*/,'').trim();
+    const tags=splitTags((body.match(/#[\u4e00-\u9fa5\w-]+/g)||[]).join(' '));
+    body=body.replace(/#[\u4e00-\u9fa5\w-]+/g,'').trim();
+    if(body)rows.push({raw,lead,body,tags});
+  });
+  if(!rows.length)return [];
+  const leads=[...new Set(rows.map(r=>r.lead))].sort((a,b)=>a-b);
+  return rows.map((r,i)=>({name:r.body,tags:r.tags,level:Math.min(leads.indexOf(r.lead),2),idx:i,tempId:'imp_'+i+'_'+Math.random().toString(36).slice(2,6)}));
+}
+function lnImportPreviewHtml(items){
+  if(!items.length)return '<div class="ln-empty">未识别到有效大纲行。</div>';
+  const labelOf=l=>l===0?'方':(l===1?'主':'知');
+  const rows=items.map(x=>`<div class="ln-import-row" data-tempid="${x.tempId}" data-level="${x.level}" style="padding-left:${8+x.level*18}px">
+    <button type="button" class="li-level" data-act="level" title="点击循环切换层级（主→知→方）">${labelOf(x.level)}</button>
+    <input class="li-name" value="${esc(x.name)}" placeholder="${x.level===0?'方向名':(x.level===1?'主题名':'知识点')}">
+    <input class="li-tags" value="${(x.tags||[]).map(t=>'#'+esc(t)).join(' ')}" placeholder="#标签（空格分隔）">
+    <button type="button" class="li-up" data-act="up" title="上移">↑</button>
+    <button type="button" class="li-down" data-act="down" title="下移">↓</button>
+    <button type="button" class="li-del" data-act="del" title="删除该行">✕</button>
+  </div>`).join('');
+  return '<div class="ln-import-preview" id="lnImportPreviewList">'+rows+'</div><p class="muted" style="margin:8px 0 0;font-size:11.5px;color:var(--text-3)">操作：上下移调整顺序；点层级标签循环切换 方/主/知；✕ 删除整行；以预览里的最终状态导入。</p>';
+}
+let lnImportCache=[];
+function openLnOutlineImport(){
+  modal(`<h4>粘贴大纲自动导入<span class="modal-close" onclick="closeModal()">×</span></h4>
+    <p style="color:var(--text-2);font-size:13px;line-height:1.7;margin:0 0 8px">支持缩进、编号、项目符号与 #标签。第 1 层会变成学习方向+计划，第 2 层变主题+阶段，第 3 层及以后变知识点+任务，会自动建出计划 Tab 可见内容。</p>
+    <textarea id="lnImportText" style="width:100%;min-height:160px;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;font:inherit;outline:none" placeholder="示例：\nSPD 项目能力 #SPD\n  物资主数据 #档案\n    物资编码规则\n    证照效期管理\n  供应商协同\n    A/B表核对流程"></textarea>
+    <div class="btns" style="margin-top:8px"><button class="cancel" id="lnImportPreviewBtn">预览拆分（可编辑）</button></div>
+    <div id="lnImportPreviewArea"></div>
+    <div class="btns" id="lnImportCommitBar" style="display:none"><button class="cancel" onclick="closeModal()">取消</button><button class="ok" onclick="lnCommitOutlineImport()">以预览状态导入</button></div>`,{noMaskClose:true});
+  $('#modalBox').classList.add('wide');
+  $('#lnImportPreviewBtn').onclick=()=>{
+    const items=parseLnOutline($('#lnImportText').value);
+    if(!items.length){$('#lnImportPreviewArea').innerHTML='<div class="ln-empty">未识别到有效大纲行（至少写一行非空文本）。</div>';$('#lnImportCommitBar').style.display='none';return}
+    $('#lnImportPreviewArea').innerHTML=lnImportPreviewHtml(items);
+    $('#lnImportCommitBar').style.display='';
+    $$('#lnImportPreviewList .ln-import-row button').forEach(b=>b.onclick=(e)=>{
+      const r=b.closest('.ln-import-row');if(!r)return;
+      const id=r.dataset.tempid;const act=b.dataset.act;
+      if(act==='up')lnImportMoveItem(id,-1);
+      if(act==='down')lnImportMoveItem(id,1);
+      if(act==='level')lnImportSetLevel(id);
+      if(act==='del')lnImportDelItem(id);
+    });
+  };
+}
+function lnPreviewOutlineImport(){lnImportCache=parseLnOutline($('#lnImportText').value);$('#lnImportPreview').outerHTML=lnImportPreviewHtml(lnImportCache)}
+function lnCollectOutlineFromDom(){
+  return $$('#lnImportPreviewList .ln-import-row').map(r=>({
+    tempId:r.dataset.tempid,
+    level:Math.max(0,Math.min(2,parseInt(r.dataset.level,10)||0)),
+    name:(r.querySelector('.li-name')?.value||'').trim(),
+    tags:splitTags(r.querySelector('.li-tags')?.value||'')
+  })).filter(x=>x.name);
+}
+function lnImportMoveItem(tempId,delta){
+  const list=$$('#lnImportPreviewList .ln-import-row');
+  const i=list.findIndex(r=>r.dataset.tempid===tempId);if(i<0)return;
+  const j=i+delta;if(j<0||j>=list.length)return;
+  const a=list[i],b=list[j];
+  if(delta>0){b.parentNode.insertBefore(a,b.nextSibling)}else{a.parentNode.insertBefore(a,b)}
+}
+function lnImportSetLevel(tempId){
+  const list=$$('#lnImportPreviewList .ln-import-row');
+  const r=list.find(x=>x.dataset.tempid===tempId);if(!r)return;
+  const next={0:1,1:2,2:0}[r.dataset.level]??0;
+  r.dataset.level=next;
+  const label=next===0?'方':(next===1?'主':'知');
+  r.querySelector('.li-level').textContent=label;
+  r.style.paddingLeft=(8+next*18)+'px';
+  r.querySelector('.li-name').placeholder=next===0?'方向名':(next===1?'主题名':'知识点');
+}
+function lnImportDelItem(tempId){
+  const r=$$('#lnImportPreviewList .ln-import-row').find(x=>x.dataset.tempid===tempId);if(r)r.remove();
+}
+function lnCommitOutlineImport(){
+  const items=lnCollectOutlineFromDom();
+  if(!items.length){toast('请先在预览里填好内容');return}
+  if(!items.some(i=>i.level===0)){toast('至少一行「方向」才能导入');return}
+  const L0=lnData();const T=todayStr();
+  // v3.20.6: order 字段一律 = 该字段在所属父级下的"位置序数" idx(0,1,2...) —— 升序排前。弃用 v3.20.2 的 orderBase-idx（反向编码）。同时给老数据提供一个 migrate 入口。
+  let curDir=null,curPlan=null,curMs=null;
+  let addDir=0,addPlan=0,addMs=0,addTask=0,addContent=0;
+  // 每个方向的 contents 在导入末尾要重新 idx 编序（仅新 push 的条目整体编）
+  const _newContentsForDir={}; // dirId -> [content...]
+  // 每个新 plan 的 milestones 与 plan 内 tasks 分别按 push 顺序 idx 编序
+  const _newPlans=[]; // plan 实例（已 push 进 L0.plans）
+  items.forEach((it,idx)=>{
+    if(it.level===0){
+      const dirId=uid();
+      curDir={id:dirId,name:it.name,desc:'由大纲导入',color:LN_COLORS[L0.directions.length%LN_COLORS.length],active:true,createdAt:T};
+      L0.directions.unshift(curDir);addDir++;
+      const planId=uid();
+      const newPlan={id:planId,directionId:dirId,title:it.name+' 计划',active:true,order:0,createdAt:T,milestones:[]};
+      L0.plans.push(newPlan);_newPlans.push(newPlan);
+      curPlan=newPlan;addPlan++;
+      curMs=null;
+    }else{
+      if(!curDir){
+        const dirId=uid();
+        curDir={id:dirId,name:'导入学习方向',desc:'由大纲导入',color:LN_COLORS[L0.directions.length%LN_COLORS.length],active:true,createdAt:T};
+        L0.directions.unshift(curDir);addDir++;
+        const planId=uid();
+        const newPlan={id:planId,directionId:dirId,title:'导入计划',active:true,order:0,createdAt:T,milestones:[]};
+        L0.plans.push(newPlan);_newPlans.push(newPlan);
+        curPlan=newPlan;addPlan++;
+      }
+      if(it.level===1){
+        const msId=uid();
+        if(!curPlan)curPlan={id:uid(),directionId:curDir.id,title:curDir.name+' 计划',active:true,order:0,createdAt:T,milestones:[]};
+        if(L0.plans.findIndex(x=>x.id===curPlan.id)<0)L0.plans.push(curPlan);
+        // v3.20.6: order 用 push 时递增的 idx（0,1,2...），不再用 orderBase-idx
+        curPlan.milestones.push({id:msId,title:it.name,due:'',order:curPlan.milestones.length,tasks:[]});
+        curMs=curPlan.milestones[curPlan.milestones.length-1];addMs++;
+        // v3.20.8: topic 的 nodeId 直接关联到自己的 ms（之前是统一打到 plan 第一个 ms，导致任务 1/2/3 全部命中所有 topic）
+        const c={id:uid(),name:it.name,directionId:curDir.id,kind:'topic',nodeId:`ms:${msId}`,tags:it.tags||[],url:'',note:'由大纲导入',notes:'',order:0,createdAt:T};
+        L0.contents.push(c);
+        (_newContentsForDir[curDir.id]=_newContentsForDir[curDir.id]||[]).push(c);
+        addContent++;
+      }else{
+        if(!curPlan)curPlan={id:uid(),directionId:curDir.id,title:curDir.name+' 计划',active:true,order:0,createdAt:T,milestones:[]};
+        if(L0.plans.findIndex(x=>x.id===curPlan.id)<0)L0.plans.push(curPlan);
+        if(!curMs){
+          const msId=uid();
+          curPlan.milestones.push({id:msId,title:curDir.name+' 阶段',due:'',order:curPlan.milestones.length,tasks:[]});
+          curMs=curPlan.milestones[curPlan.milestones.length-1];addMs++;
+        }
+        const taskId=uid();
+        curMs.tasks.push({id:taskId,title:it.name,done:false,note:'',order:curMs.tasks.length});addTask++;
+        const c={id:uid(),name:it.name,directionId:curDir.id,kind:'kp',parentId:null,nodeId:taskId,tags:it.tags||[],mastered:false,url:'',note:'由大纲导入',notes:'',order:0,createdAt:T};
+        L0.contents.push(c);
+        (_newContentsForDir[curDir.id]=_newContentsForDir[curDir.id]||[]).push(c);
+        addContent++;
+      }
+    }
+  });
+  // v3.20.6: 给新导入的 topic/kp contents 按 push 顺序编 order=0..N-1
+  Object.values(_newContentsForDir).forEach(arr=>arr.forEach((c,i)=>{c.order=i;}));
+  // 给新导入的 plan.milestones 与各 milestone.tasks 按 push 顺序补 order（其实 push 时已 = length，多了冗余无妨）
+  _newPlans.forEach(p=>{
+    (p.milestones||[]).forEach((m,mi)=>{if(typeof m.order!=='number')m.order=mi;});
+    (p.milestones||[]).forEach(m=>{(m.tasks||[]).forEach((t,ti)=>{if(typeof t.order!=='number')t.order=ti;});});
+  });
+  // v3.20.8: 老数据兜底——把所有 topic.content.nodeId 重新匹配到 title 相同的 ms（修 v3.20.2/v3.20.6 时代码统一打到 ms1 的旧 bug）
+  L0.plans.forEach(p=>{
+    const msByTitle={};(p.milestones||[]).forEach(m=>{if(m.title)msByTitle[m.title]=m;});
+    L0.contents.filter(c=>c.kind==='topic'&&c.directionId===p.directionId).forEach(t=>{
+      const m=msByTitle[t.name];
+      if(m){t.nodeId=`ms:${m.id}`;}
+    });
+  });
+  // v3.20.6: 自动迁移老数据 order 字段（如果发现 ms/tasks/content 的 order 不是 number 或看起来是反向编码）
+  migrateLearningOrdering(L0,true);
+  persist();closeModal();
+  lnCurrentDir=curDir?curDir.id:null;
+  lnDetailTab='plans';
+  renderLearning();
+  toast('导入 '+addDir+' 方向 '+addPlan+' 计划 '+addMs+' 阶段 '+addTask+' 任务 · '+addContent+' 学习结构');
+}
+/* v3.20.7: 老数据 order 迁移——按章号解析重排 contents/plans，task 跟 milestone 走。
+   判定老数据：① order 不是 number；② 看起来是 v3.20.2 旧编码（>2^40 巨数 = Date.now() 量级）。
+   修正策略：topic/plan 按"第 N 章/章 N"解析章号升序，再按原顺序编号；未匹配章号兜底排最后。silent=true 时不弹提示。*/
+function migrateLearningOrdering(L0,silent){
+  if(!L0||!L0.directions)return 0;
+  let fixed=0;
+  const _looksLegacy=v=>typeof v==='number'&&v>4e12;
+  const _looksLegacyOrMissing=v=>typeof v!=='number'||_looksLegacy(v);
+  // 章号解析：从「第 N 章」/「章 N」/「N.」/仅"第N章"等取数字
+  const _chapNum=s=>{const m=String(s||'').match(/第?\s*([一二三四五六七八九十百\d]+)\s*[章节回]/);if(!m)return null;const cn={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'百':100};const raw=m[1].trim();if(/^\d+$/.test(raw))return parseInt(raw,10);let n=0;for(const ch of raw){n+=cn[ch]||0;}return n||null;};
+  // 按章号升序排：解析得到章号按数值排，解析不到排最后
+  const _sortByChap=(a,b)=>{const na=_chapNum(a.title||a.name||'');const nb=_chapNum(b.title||b.name||'');if(na!=null&&nb!=null)return na-nb;if(na!=null)return -1;if(nb!=null)return 1;return 0;};
+  // 1) plans 自身：按当前顺序 0..N-1（plans 通常只有一个，无需按章号排）
+  (L0.plans||[]).forEach(p=>{
+    if(_looksLegacyOrMissing(p.order)){p.order=0;fixed++;}
+  });
+  // 2) 每个 plan.milestones 按章号升序重排
+  (L0.plans||[]).forEach(p=>{
+    const ms=p.milestones||[];
+    if(!ms.length)return;
+    const sorted=[...ms].sort(_sortByChap);
+    const need=ms.some((m,i)=>_looksLegacyOrMissing(m.order)||(typeof m.order==='number'&&m.order!==i)) || sorted.some((m,i)=>m!==ms[i]);
+    if(need){sorted.forEach((m,i)=>{m.order=i;});fixed++;}
+    // 3) 每个 milestone.tasks 按当前顺序重排 0..N-1
+    sorted.forEach(m=>{
+      const ts=m.tasks||[];
+      if(!ts.length)return;
+      const needT=ts.some((t,i)=>_looksLegacyOrMissing(t.order)||(typeof t.order==='number'&&t.order!==i));
+      if(needT){ts.forEach((t,i)=>{t.order=i;});fixed++;}
+    });
+  });
+  // 4) 每个方向的 contents 按 [topic 章号, topic-内 idx] 排序后重排 order
+  (L0.directions||[]).forEach(d=>{
+    const allCs=(L0.contents||[]).filter(c=>c.directionId===d.id);
+    if(!allCs.length)return;
+    const topics=allCs.filter(c=>c.kind==='topic'||c.kind===undefined);
+    const others=allCs.filter(c=>c.kind!=='topic'&&c.kind!==undefined);
+    // topic 按章号升序排
+    const sortedTopics=[...topics].sort(_sortByChap);
+    // 给每个 topic 编新的 idx（按章号升序）；其他内容按"其 topic 的新 idx * 1000 + 局部 idx" 排
+    const topicNewIdx=new Map();sortedTopics.forEach((t,i)=>topicNewIdx.set(t.id,i));
+    // 所有内容按虚拟 key 排序
+    const contentKey=c=>{
+      const topicId=(c.kind==='topic'||c.kind===undefined)?c.id:c.parentId;
+      const tIdx=topicId?topicNewIdx.get(topicId):null;
+      if(tIdx!=null){
+        const sibs=(c.kind==='topic'||c.kind===undefined)?sortedTopics:allCs.filter(x=>x.parentId===topicId);
+        const localIdx=sibs.indexOf(c);
+        return tIdx*10000+(localIdx<0?9999:localIdx);
+      }
+      return Number.MAX_SAFE_INTEGER;
+    };
+    const allSorted=[...allCs].sort((a,b)=>contentKey(a)-contentKey(b));
+    const needC=allCs.some((c,i)=>_looksLegacyOrMissing(c.order)) || allSorted.some((c,i)=>allCs[i]!==c);
+    if(needC){allSorted.forEach((c,i)=>{c.order=i;});fixed++;}
+  });
+  if(fixed>0 && !silent){toast('已自动修正 '+fixed+' 处顺序字段（v3.20.7 数据迁移）');}
+  return fixed;
 }
 /* —— 复习 —— */
 function addReview(refType,refId,dirId){
@@ -4411,7 +5011,7 @@ function renderLnNodeView(){
   /* FIFO：先按创建时间正序排序，再做父子聚合 */
   const contentsAll=lnFifo(ni.contents,'createdAt');
   const hit=new Set(contentsAll.map(c=>c.id));{let _a=true;while(_a){_a=false;for(const _c of L0.contents){if(!hit.has(_c.id)&&_c.parentId&&hit.has(_c.parentId)){hit.add(_c.id);_a=true;}}}}
-  const roots=lnFifo(L0.contents.filter(c=>hit.has(c.id)&&(!c.parentId||!hit.has(c.parentId))),'createdAt');
+  const roots=lnFifo(L0.contents.filter(c=>hit.has(c.id)&&(!c.parentId||!hit.has(c.parentId))),'order');
   const questionsAll=lnFifo(ni.questions,'createdAt');
   const reviewsAll=lnFifo(ni.reviews,'due');
   const selftestsAll=lnFifo(ni.selftests,'date');
@@ -4445,37 +5045,248 @@ function renderLnDirMistakes(d,L0){
   return html;
 }
 /* —— 资源 —— */
+/* v3.20.9: 资源 tab 按父节点（topic/任务）分组聚合统计 + 支持折叠；统计按"每个父节点的资源数"倒序；同父节点下按录入顺序 */
 function renderLnDirResources(d,L0){
-  const list=lnFifo(L0.contents.filter(c=>c.directionId===d.id&&c.kind==='resource'));
-  let html='';
-  if(!list.length){html='<div class="ln-empty">还没有资源型资料。<br>在「内容」里添加时选择「资料（书/课/链接）」即可。</div>';return html}
-  list.forEach(c=>{const node=lnTaskTitleById(L0,c.nodeId);const hasNotes=c.notes&&c.notes.trim();const notesTag=hasNotes?`<span class="ln-tag" style="cursor:pointer" onclick="lnToggleNotes('${c.id}')" title="点击查看学习心得">心得</span>`:'';html+=`<div class="card" style="margin-top:8px"><div class="ln-item" style="border:none;padding:0"><div class="ln-main"><div class="ln-title">${esc(c.name)}${notesTag}</div><div class="ln-sub">${node?('节点：'+esc(node)+' · '):''}${c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> · `:''}${c.note?esc(c.note):'无备注'}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`});
+  // 全方向下所有资源（含 kind==='resource' 的 + 任何 nodeId 指向 task 的内容都视为资源）
+  const all=L0.contents.filter(c=>c.directionId===d.id);
+  const resources=lnFifo(all.filter(c=>c.kind==='resource'||(c.kind==='kp'&&!c.parentId)),'order');
+  if(!resources.length&&!all.length)return '<div class="ln-empty">还没有资料。<br>在「内容」里添加时选择「资料（书/课/链接）」即可。</div>';
+  if(!resources.length)return '<div class="ln-empty">还没有资源型资料。<br>在「内容」里添加时选择「资料（书/课/链接）」即可。</div>';
+  // 按父节点聚合：nodeId 为 taskId 的算「任务下资源」，没有的归到「未分组」
+  const groups=new Map();const NO_PARENT='__none__';
+  resources.forEach(r=>{
+    if(r.nodeId){const arr=groups.get(r.nodeId)||[];arr.push(r);groups.set(r.nodeId,arr);}
+    else{const arr=groups.get(NO_PARENT)||[];arr.push(r);groups.set(NO_PARENT,arr);}
+  });
+  // 排序：父节点（任务）按 plan 顺序，未分组的排最后
+  const allT=lnFifo(L0.plans.filter(p=>p.directionId===d.id),'order');
+  const orderedTaskIds=[];allT.forEach(p=>(p.milestones||[]).forEach(m=>(m.tasks||[]).forEach(t=>orderedTaskIds.push(t.id))));
+  const sortedKeys=[...groups.keys()].sort((a,b)=>{
+    const ia=orderedTaskIds.indexOf(a);const ib=orderedTaskIds.indexOf(b);
+    if(a===NO_PARENT)return 1;if(b===NO_PARENT)return -1;
+    if(ia<0&&ib<0)return 0;if(ia<0)return 1;if(ib<0)return -1;
+    return ia-ib;
+  });
+  let html=`<div class="ln-quick" style="margin-bottom:8px;font-size:12px;color:var(--text-2)">共 <b>${resources.length}</b> 个资料，按父节点聚合 <button style="margin-left:8px;border:1px solid var(--line);background:#fff;border-radius:var(--r-sm);padding:4px 10px;cursor:pointer" onclick="lnResToggleAll(this)">展开/折叠全部</button></div>`;
+  sortedKeys.forEach(pid=>{
+    const items=groups.get(pid);
+    const parentTitle=pid===NO_PARENT?'⚠️ 未分组（建议编辑关联节点）':(lnTaskTitleById(L0,pid)||pid);
+    const gKey='res-'+pid;
+    html+=`<div class="card" style="margin-top:8px"><div class="ln-item" style="border:none;padding:0"><span class="ln-caret" data-res-grp="${gKey}" onclick="lnResToggleGrp(this)">▼</span><div class="ln-main"><div class="ln-title" style="font-size:13px">📂 ${esc(parentTitle)} <span class="ln-tag" style="font-weight:500">${items.length} 资料</span></div></div></div><div data-res-grp-body="${gKey}">`;
+    items.forEach(c=>{
+      const hasNotes=c.notes&&c.notes.trim();
+      const notesTag=hasNotes?`<span class="ln-tag" style="cursor:pointer" onclick="lnToggleNotes('${c.id}')" title="点击查看学习心得">心得</span>`:'';
+      const tags=(c.tags||[]).map(t=>`<span class="ln-tag">#${esc(t)}</span>`).join('');
+      const link=c.url?`<a href="${esc(c.url)}" target="_blank" style="color:var(--text-2)">链接</a> ·`:'';
+      html+=`<div class="card ln-res-child" style="margin-top:6px"><div class="ln-item" style="border:none;padding:0"><span class="ln-caret-ph"></span><div class="ln-main"><div class="ln-title">${esc(c.name)}${notesTag}</div><div class="ln-sub">${tags?tags+' · ':''}${link}${c.note?esc(c.note):'无备注'} · ${c.createdAt||''}</div></div><div class="ln-acts"><button onclick="openLnContentModal('${c.directionId}','${c.id}')">编辑</button><button onclick="lnDelContent('${c.id}')" style="color:var(--bad)">删除</button></div></div>${lnNotesHtml(c)}</div>`;
+    });
+    html+=`</div></div>`;
+  });
   return html;
+}
+function lnResToggleGrp(caret){
+  const key=caret.getAttribute('data-res-grp');
+  const body=document.querySelector(`[data-res-grp-body="${CSS.escape(key)}"]`);
+  if(!body)return;
+  const hidden=body.style.display==='none';
+  body.style.display=hidden?'':'none';
+  caret.textContent=hidden?'▼':'▶';
+}
+function lnResToggleAll(btn){
+  const bodies=document.querySelectorAll('[data-res-grp-body]');
+  const allHidden=[...bodies].every(b=>b.style.display==='none');
+  bodies.forEach(b=>{
+    b.style.display=allHidden?'':'none';
+    const key=b.getAttribute('data-res-grp-body');
+    const caret=document.querySelector(`[data-res-grp="${CSS.escape(key)}"]`);
+    if(caret)caret.textContent=allHidden?'▼':'▶';
+  });
 }
 /* —— 大纲（树） —— */
 function renderLnDirOutline(d,L0){
   const plans=L0.plans.filter(p=>p.directionId===d.id);
   if(!plans.length)return '<div class="ln-empty">还没有计划，去「计划」页新建。</div>';
-  let html='';
+  let html=`<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button class="ln-detail-acts-btn" onclick="lnExportOutline('${d.id}')" style="border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:7px 14px;font-size:13px;color:var(--text);font-weight:600;cursor:pointer">📤 导出大纲</button></div>`;
   plans.forEach(p=>{
     html+=`<div class="ln-card"><div class="ln-ms-top"><b>${esc(p.title)}</b></div>`;
     (p.milestones||[]).forEach(m=>{
-      html+=`<div style="margin:6px 0 2px;font-size:12px;color:var(--text-2);font-weight:600">${esc(m.title||'阶段')}${m.due?' · '+m.due:''}</div>`;
-      (m.tasks||[]).forEach(t=>{const ni=lnNodeItems(L0,t.id);const done=t.done?'✅':'▫️';const cnts=[];if(ni.contents.length)cnts.push('📄'+ni.contents.length);if(ni.questions.length)cnts.push('💡'+ni.questions.length);if(ni.reviews.length)cnts.push('🔁'+ni.reviews.length);html+=`<div class="ln-task ln-task-node" onclick="lnOpenNode('${d.id}','${p.id}','${m.id}','${t.id}')"><span class="ln-task-t">${done} ${t.title?esc(t.title):'未命名任务'}</span>${cnts.length?`<span class="ln-task-cnt">${cnts.join(' ')}</span>`:''}<span class="ln-task-go">›</span></div>`});
+      // v3.20.10: 阶段加折叠（复用 lnToggleTopic + lnTopicCollapsed，key 用 ms:msId 命名空间避免与内容 ID 冲突）
+      const mKey='ms:'+m.id;
+      const mOpen=!lnTopicCollapsed[mKey];
+      const hasT=(m.tasks||[]).length>0;
+      html+=`<div class="ln-ms-row" style="margin:6px 0 2px"><div onclick="lnToggleTopic('${mKey}')" style="font-size:12px;color:var(--text-2);font-weight:600;cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px" title="点击折叠/展开该阶段任务"><span class="ln-ms-caret">${hasT?(mOpen?'▼':'▶'):'·'}</span><span>${esc(m.title||'阶段')}${m.due?' · '+m.due:''}</span></div>`;
+      if(hasT&&mOpen){
+        (m.tasks||[]).forEach(t=>{const ni=lnTaskItems(L0,t.id);const done=t.done?'✅':'▫️';const cnts=[];if(ni.contents.length)cnts.push('📄'+ni.contents.length);if(ni.questions.length)cnts.push('💡'+ni.questions.length);html+=`<div class="ln-task ln-task-node ln-task-child" onclick="lnOpenNode('${d.id}','${p.id}','${m.id}','${t.id}')"><span class="ln-task-t">${done} ${t.title?esc(t.title):'未命名任务'}</span>${cnts.length?`<span class="ln-task-cnt">${cnts.join(' ')}</span>`:''}<span class="ln-task-go">›</span></div>`});
+      }
+      html+=`</div>`;
     });
     html+='</div>';
   });
   return html;
 }
+/* v3.20.6: 导出大纲 —— 生成 2 空格缩进文本（方向 / 主题 / 知识点，附 #标签），弹层支持一键复制 + 下载 .txt */
+function lnExportOutline(dirId){
+  const L0=lnData();const d=L0.directions.find(x=>x.id===dirId);
+  if(!d){toast('方向不存在');return}
+  // 重建层级：方向(d.name) → 各 plan.milestones(主题) → 各 milestone.tasks(知识点)
+  // 取已排序的：plan.order asc，ms.order asc，task.order asc
+  const plans=lnFifo(L0.plans.filter(p=>p.directionId===dirId),'order');
+  const lines=[];
+  // 方向行
+  const dirTags=d.tags&&d.tags.length?' #'+d.tags.join(' #'):'';
+  lines.push(d.name+dirTags);
+  let addedTopic=0,addedTask=0;
+  if(!plans.length){
+    // 无 plan 就把该方向下所有 contents 直接按 kind(topic=主、kp=知识点)分两层输出
+    const cs=lnFifo(L0.contents.filter(c=>c.directionId===dirId),'order');
+    cs.forEach(c=>{
+      if(c.kind==='topic'){lines.push('  '+c.name+((c.tags&&c.tags.length)?' #'+c.tags.join(' #'):''));addedTopic++;}
+      else if(c.kind==='kp'){lines.push('    '+c.name+((c.tags&&c.tags.length)?' #'+c.tags.join(' #'):''));addedTask++;}
+    });
+  } else {
+    plans.forEach((p,pi)=>{
+      const msSorted=lnFifo(p.milestones||[],'order');
+      msSorted.forEach((m,mi)=>{
+        const tSorted=lnFifo(m.tasks||[],'order');
+        if(tSorted.length){
+          // 任务带出来实际是知识点；所以主题 = milestone.title，知识点 = task.title
+          lines.push('  '+(m.title||'阶段')+((m.due?' (#'+m.due+')':'')));
+          addedTopic++;
+          tSorted.forEach(t=>{lines.push('    '+(t.title||'未命名任务'));addedTask++;});
+        } else {
+          // ms 没任务但有 contents（子主题/资料），仍归类到主题层
+          lines.push('  '+(m.title||'阶段'));
+          addedTopic++;
+        }
+      });
+      // 这个 plan 里 ms 之外、该 direction 下与本 plan 关联的 topic contents 也并入（保证不漏）
+    });
+    // 兜底：该方向下无 ms 归属的 topic/kp contents（保留他们的顺序）
+    const orphanTopics=L0.contents.filter(c=>c.directionId===dirId&&c.kind==='topic'&&!plans.some(p=>(p.milestones||[]).some(m=>m.title===c.name)));
+    if(orphanTopics.length){
+      const sortedOT=lnFifo(orphanTopics,'order');
+      sortedOT.forEach(c=>{lines.push('  '+c.name+((c.tags&&c.tags.length)?' #'+c.tags.join(' #'):''));addedTopic++;});
+    }
+  }
+  const text=lines.join('\n');
+  const fileName=(d.name||'大纲').replace(/[\\/:*?"<>|]/g,'_')+'.txt';
+  modal(`<div class="modal" style="max-width:520px"><div class="ttl">📤 导出大纲</div>
+    <div class="muted" style="font-size:12px;margin-bottom:6px">来自【${esc(d.name)}】，复制后到正式库的「学习→导入大纲」粘贴即可。</div>
+    <textarea id="lnExpText" readonly style="width:100%;min-height:240px;max-height:50vh;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.6;outline:none;resize:vertical;background:#fff">${esc(text)}</textarea>
+    <div class="ln-kb-a" style="margin:8px 0 4px;font-size:12px">主题 ${addedTopic} · 知识点 ${addedTask}</div>
+    <div class="btns" style="display:flex;gap:8px;margin-top:10px">
+      <button id="lnExpCopy" style="flex:2;background:var(--text);color:#fff;border-radius:var(--r-sm);padding:9px 14px;font-weight:600;border:none;cursor:pointer">📋 一键复制</button>
+      <button id="lnExpDl" style="flex:1;border:1px solid var(--line);background:#fff;border-radius:var(--r-sm);padding:9px 14px;font-weight:600;cursor:pointer">下载 .txt</button>
+      <button class="cancel" onclick="closeModal()" style="flex:none;border:1px solid var(--line);background:#fff;border-radius:var(--r-sm);padding:9px 14px;color:var(--text-2);cursor:pointer">关闭</button>
+    </div>
+  </div>`,{noMaskClose:true});
+  setTimeout(()=>{
+    const ta=document.getElementById('lnExpText');
+    const cp=document.getElementById('lnExpCopy');
+    const dl=document.getElementById('lnExpDl');
+    if(cp){
+      cp.onclick=async()=>{
+        try{await navigator.clipboard.writeText(text);cp.textContent='✅ 已复制';setTimeout(()=>cp.textContent='📋 一键复制',1600);}
+        catch(e){ta.select();document.execCommand('copy');cp.textContent='✅ 已复制';setTimeout(()=>cp.textContent='📋 一键复制',1600);}
+      };
+    }
+    if(dl){
+      dl.onclick=()=>{
+        try{
+          const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),500);
+          dl.textContent='✅ 已下载';setTimeout(()=>dl.textContent='下载 .txt',1600);
+        }catch(e){toast('下载失败：'+e.message);}
+      };
+    }
+    // 自动选中文本，方便用户手动 Cmd/Ctrl+C 兜底
+    try{ta.focus();ta.select();}catch(_){}
+  },0);
+}
 /* —— 时间轴 —— */
+/* v3.20.15: 时间轴 tab 上下级展示统一到 v3.20.14b 视觉规范——阶段/任务/资料/问题/复习 全部用专用子级类（.ln-tt-stage / .ln-tt-task / .ln-tt-section / .ln-tt-row），沿用「左缩进 + 左边框 + 浅背景 + 小字号 + 紧凑 padding + padding-right:16px 右边齐平」 */
 function renderLnDirTimeline(d,L0){
-  const items=[];
-  L0.contents.filter(c=>c.directionId===d.id).forEach(c=>items.push({dt:c.createdAt,type:'内容',title:c.name,node:lnTaskTitleById(L0,c.nodeId)}));
-  L0.questions.filter(q=>q.directionId===d.id).forEach(q=>items.push({dt:q.createdAt,type:q.hard?'难点':(q.status==='solved'?'已解':(q.status==='doing'?'解决中':'问题')),title:q.title,node:lnTaskTitleById(L0,q.nodeId)}));
-  L0.reviews.filter(r=>r.directionId===d.id).forEach(r=>{let tt='';if(r.refType==='question'){const qq=L0.questions.find(x=>x.id===r.refId);tt=qq?qq.title:''}else{const cc=L0.contents.find(x=>x.id===r.refId);tt=cc?cc.name:''}items.push({dt:r.due,type:'复习',title:tt,node:lnTaskTitleById(L0,r.nodeId)})});
-  items.sort((a,b)=>(b.dt||'').localeCompare(a.dt||''));
-  if(!items.length)return '<div class="ln-empty">还没有记录。</div>';
-  return items.map(it=>`<div class="card" style="margin-top:6px"><div class="ln-item" style="border:none;padding:6px 4px"><div class="ln-main"><div class="ln-title" style="font-size:13px">${esc(it.title)}</div><div class="ln-sub">${it.type}${it.node?' · '+esc(it.node):''} · ${it.dt||''}</div></div></div></div>`).join('');
+  const plans=lnFifo(L0.plans.filter(p=>p.directionId===d.id),'order');
+  if(!plans.length){
+    const ords=L0.questions.filter(q=>q.directionId===d.id&&q.status==='solved').length;
+    return '<div class="ln-empty">还没有计划。<br>在「计划」tab 新建或「大纲」tab 粘贴大纲自动导入。</div>';
+  }
+  let html=`<div class="ln-quick" style="margin-bottom:8px"><button onclick="lnToggleAllTimeline(this)" style="border:1px solid var(--line);background:#fff;border-radius:var(--r-sm);padding:6px 12px;cursor:pointer">全部展开/折叠</button></div>`;
+  plans.forEach((p,pIdx)=>{
+    html+=`<div class="card" style="margin-top:10px"><div class="ln-item" style="border:none;padding:0"><span class="ln-caret" data-tt-key="p:${p.id}" onclick="lnToggleTimeline(this)">▼</span><div class="ln-main"><div class="ln-title" style="font-weight:700">📘 ${esc(p.title)}</div><div class="ln-sub">计划 · ${(p.milestones||[]).length} 阶段 · ${(p.milestones||[]).reduce((n,m)=>n+(m.tasks||[]).length,0)} 任务</div></div></div><div data-tt-body="p:${p.id}">`;
+    (p.milestones||[]).forEach((m,mIdx)=>{
+      const mKey=`m:${p.id}:${m.id}`;
+      const mDate=m.due?`<span class="ln-tag" style="border-color:var(--bad);color:var(--bad)">${esc(m.due)}</span>`:'';
+      html+=`<div class="ln-tt-stage"><span class="ln-caret" data-tt-key="${mKey}" onclick="lnToggleTimeline(this)">▼</span><div class="ln-main"><div class="ln-title">${esc(m.title||'阶段')} ${mDate}</div></div></div><div data-tt-body="${mKey}">`;
+      const ts=m.tasks||[];
+      if(!ts.length){html+=`<div class="ln-empty" style="padding:8px;font-size:12px">该阶段无任务</div>`;}
+      ts.forEach((t,tIdx)=>{
+        const tKey=`t:${p.id}:${m.id}:${t.id}`;
+        const items=lnItemsForNode(L0,{planId:p.id,msId:m.id,taskId:t.id});
+        const cs=items.contents||[]; const qs=items.questions||[]; const revs=items.reviews||[];
+        const done=t.done?'✅':'▫️';
+        const hasKids=cs.length+qs.length+revs.length>0;
+        html+=`<div class="ln-tt-task"><span class="ln-caret" data-tt-key="${tKey}" onclick="lnToggleTimeline(this)">${hasKids?'▼':'▶'}</span><div class="ln-main"><div class="ln-title">${done} ${esc(t.title||'未命名任务')} <span class="ln-tag" style="font-weight:500">📄${cs.length} 💡${qs.length} 🔁${revs.length}</span></div></div></div><div data-tt-body="${tKey}" ${hasKids?'':'style="display:none"'}>`;
+        if(cs.length){
+          html+=`<div class="ln-tt-section">资料 / 子内容</div>`;
+          cs.forEach(c=>{
+            const kind=c.kind==='topic'?'主题':(c.kind==='kp'?'知识点':'资料');
+            const link=c.url?` · <a href="${esc(c.url)}" target="_blank">链接</a>`:'';
+            html+=`<div class="ln-tt-row"><span class="ln-tt-kind">📄 ${esc(c.name)}</span><span class="ln-tag" style="font-weight:500;flex:none">${kind}</span><span class="ln-tt-meta">${c.note?esc(c.note):''}${link}${c.createdAt?' · '+c.createdAt:''}</span></div>`;
+          });
+        }
+        if(qs.length){
+          html+=`<div class="ln-tt-section">问题</div>`;
+          qs.forEach(q=>{
+            const st=q.status==='solved'?'已解':(q.status==='doing'?'解决中':'待解决');
+            const hard=q.hard?'<span class="ln-tag" style="border-color:var(--bad);color:var(--bad);flex:none">难点</span>':'';
+            const tail=q.answer?' · 答:'+esc(q.answer.slice(0,40)):(q.detail?' · '+esc(q.detail.slice(0,40)):'');
+            html+=`<div class="ln-tt-row"><span class="ln-tt-kind">💡 ${esc(q.title)}</span><span class="ln-tag" style="font-weight:500;flex:none">${st}</span>${hard}<span class="ln-tt-meta">${tail}${q.createdAt?' · '+q.createdAt:''}</span></div>`;
+          });
+        }
+        if(revs.length){
+          html+=`<div class="ln-tt-section">复习</div>`;
+          revs.forEach(r=>{
+            html+=`<div class="ln-tt-row"><span class="ln-tt-kind">🔁 复习</span><span class="ln-tt-meta">于 ${r.due||'未排'} · 间隔 ${r.interval||'-'}</span></div>`;
+          });
+        }
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    });
+    html+=`</div></div>`;
+  });
+  // 兜底：方向下未挂计划的游离内容（如纯资源），强制归到第一个 plan 第一个 ms 第一个 task 下展示
+  const orphans=L0.contents.filter(c=>c.directionId===d.id&&!c.nodeId).slice(0,5);
+  if(orphans.length){
+    html+=`<div class="ln-ms" style="margin-top:14px">未挂任务的资料（建议在编辑里选关联节点）</div>`;
+    orphans.forEach(c=>{
+      const kind=c.kind==='resource'?'资料':(c.kind==='kp'?'知识点':'主题');
+      html+=`<div class="card" style="margin-top:6px"><div class="ln-item" style="border:none;padding:6px 4px"><div class="ln-main"><div class="ln-title" style="font-size:13px">${esc(c.name)}</div><div class="ln-sub">${kind}${c.note?' · '+esc(c.note):''} · ${c.createdAt||''}</div></div></div></div>`;
+    });
+  }
+  return html;
+}
+function lnToggleTimeline(caret){
+  const key=caret.getAttribute('data-tt-key');
+  if(!key)return;
+  const body=document.querySelector(`[data-tt-body="${CSS.escape(key)}"]`);
+  if(!body)return;
+  const hidden=body.style.display==='none';
+  body.style.display=hidden?'':'none';
+  caret.textContent=hidden?'▼':'▶';
+}
+function lnToggleAllTimeline(btn){
+  const bodies=document.querySelectorAll('[data-tt-body]');
+  const allHidden=[...bodies].every(b=>b.style.display==='none');
+  bodies.forEach(b=>{
+    b.style.display=allHidden?'':'none';
+    const key=b.getAttribute('data-tt-body');
+    const caret=document.querySelector(`[data-tt-key="${CSS.escape(key)}"]`);
+    if(caret)caret.textContent=allHidden?'▼':'▶';
+  });
+  btn.textContent=allHidden?'全部折叠':'全部展开';
 }
 /* —— 自测 —— */
 function renderLnDirSelftests(d,L0){
@@ -4511,6 +5322,30 @@ function openLnSelftestModal(dirId,id,nodeId){
 
 initFilters();
 renderAll();
+
+/* v3.20.3: 学习方向卡全局 click 事件委托（替代 inline onclick，绕开 iOS PWA 缓存断链） */
+(function bindLnHomeCardClick(){
+  const body = document.getElementById('lnBody');
+  if (!body || body._lnHomeClickBound) return;
+  body.addEventListener('click', function(e){
+    const card = e.target && e.target.closest && e.target.closest('[data-dir-id]');
+    if (card && body.contains(card)) {
+      const id = card.getAttribute('data-dir-id');
+      if (id && typeof lnOpenDir === 'function') lnOpenDir(id);
+    }
+  });
+  // 键盘可达：回车键也触发
+  body.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const card = e.target && e.target.closest && e.target.closest('[data-dir-id]');
+    if (card && body.contains(card)) {
+      e.preventDefault();
+      const id = card.getAttribute('data-dir-id');
+      if (id && typeof lnOpenDir === 'function') lnOpenDir(id);
+    }
+  });
+  body._lnHomeClickBound = true;
+})();
 
 /* 云同步初始化 */
 renderSyncBtn();

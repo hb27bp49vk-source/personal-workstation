@@ -16,15 +16,16 @@
 /* ====== 设计令牌 · 墨白极简 ====== */
 :root{
   /* 背景 / 卡片：墨白极简，中性黑白灰，不偏暖 */
-  --bg:#ffffff; --bg2:#f7f7f5;
-  --card:#ffffff; --card-soft:#f9f9f8; --card-hover:#f4f4f2; --card-tint:#f9f9f8;
+  --bg:#f5f5f3; --bg2:#efefec;
+  --card:#ffffff; --card-soft:#faf9f7; --card-hover:#f3f2ef; --card-tint:#f9f9f8;
   --text:#1a1a1a; --text-2:#6b6b6b; --text-3:#a0a0a0;
-  --line:#e5e5e3; --line-soft:#efefed;
+  --line:#e8e8e5; --line-soft:#f1f1ee;
   --pri:#1a1a1a; --pri-light:#4a4a4a; --pri-soft:rgba(26,26,26,.04); --pri-grad:#1a1a1a;
   --ok:#5a7a4e; --warn:#9a7a3a; --bad:#b04a4a;
   --income:#5a7a4e; --expense:#b04a4a;
-  --shadow:none; --shadow-sm:none;
-  --r:10px; --r-sm:7px; --r-xs:5px;
+  --shadow:0 1px 2px rgba(20,20,20,.04),0 2px 10px rgba(20,20,20,.05); --shadow-sm:0 1px 2px rgba(20,20,20,.05);
+  --r:14px; --r-sm:10px; --r-xs:7px;
+  --tab-on:#1a1a1a;
   --tab-h:56px; --max:560px;
   /* 模块柔和强调色（莫兰迪低饱和，做明显区分，无大色块） */
   --m-worklog:#c4a062; --m-todos:#6a8db5; --m-habits:#6ab58a; --m-todayMoney:#c4756b;
@@ -68,6 +69,16 @@ main{flex:1;padding:16px 16px calc(var(--tab-h) + 24px)}
 .page-title{font-size:11px;color:var(--text-3);font-weight:600;margin:2px 2px 10px;letter-spacing:.5px;text-transform:uppercase}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:background .15s}
 .card:hover{background:var(--card-soft)}
+/* ====== 视觉精修：顶部焦点卡 + 暗色切换按钮 ====== */
+.focus{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.focus .f-item{display:flex;flex-direction:column;gap:4px}
+.focus .f-lab{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.focus .f-lab .dot{width:8px;height:8px;border-radius:3px;flex:none}
+.focus .f-num{font-size:26px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.focus .f-num.ex{color:var(--expense)}
+.focus .f-num.ok{color:var(--income)}
+.focus .f-sub{font-size:12px;color:var(--text-3)}
+.topbar-row > div:first-child{flex:1}
 .card h3{margin:0 0 12px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
 .card h3 .ic{width:18px;height:18px;color:var(--text);flex:none}
 .sec{margin-bottom:20px}
@@ -93,7 +104,7 @@ main{flex:1;padding:16px 16px calc(var(--tab-h) + 24px)}
 .sec[data-module="changelog"]{--mac:var(--m-changelog)}
 .sec[data-module="about"]{--mac:var(--m-about)}
 .sec[data-module] > .page-title{border-left:3px solid var(--mac);padding-left:9px;color:var(--mac)}
-.sec[data-module] > .card{box-shadow:inset 3px 0 0 var(--mac);border-color:var(--line)}
+.sec[data-module] > .card{box-shadow:var(--shadow),inset 3px 0 0 var(--mac);border-color:var(--line)}
 .sec[data-module] .card h3 .ic{color:var(--mac)}
 .sec[data-module="todos"] .todo-prog i{background:var(--m-todos)}
 .sec[data-module="habits"] .habit-card.done{background:rgba(106,181,138,.10);border-color:rgba(106,181,138,.42)}
@@ -424,8 +435,8 @@ nav.tabbar{
 }
 nav.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);font-size:10.5px;text-decoration:none;transition:.15s}
 nav.tabbar a .ic{width:22px;height:22px;transition:.15s}
-nav.tabbar a.on{color:#3f5d68}
-nav.tabbar a.on .ic{color:#3f5d68}
+nav.tabbar a.on{color:var(--tab-on)}
+nav.tabbar a.on .ic{color:var(--tab-on)}
 nav.tabbar a.on .ic{transform:scale(1.05)}
 
 /* ====== 通用 ====== */
@@ -780,7 +791,6 @@ summary::-webkit-details-marker{color:var(--text)}
         <div class="date" id="hDate"></div>
         <div class="greet"><span class="dot"></span><span id="hGreet">你好</span></div>
         <div class="sub" id="hSub"></div>
-        
       </div>
       <button class="refresh-btn" id="refreshBtn" title="刷新页面">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -794,6 +804,18 @@ summary::-webkit-details-marker{color:var(--text)}
     <input type="file" id="mergeFile" accept="application/json" hidden>
     <!-- 今日 -->
     <section class="page active" id="page-today">
+      <div class="focus">
+        <div class="f-item">
+          <div class="f-lab"><span class="dot" style="background:var(--expense)"></span>今日支出</div>
+          <div class="f-num ex">¥186</div>
+          <div class="f-sub">较昨日 ↓ 12%</div>
+        </div>
+        <div class="f-item">
+          <div class="f-lab"><span class="dot" style="background:var(--income)"></span>待办完成</div>
+          <div class="f-num ok">3/5</div>
+          <div class="f-sub">剩余 2 项</div>
+        </div>
+      </div>
       <button class="qn-entry" id="qnEntry">
         <svg class="qn-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <div class="qn-tx"><div class="t">速记录入</div><div class="s">粘贴手机记录，自动拆分到各模块（记为今天）</div></div>

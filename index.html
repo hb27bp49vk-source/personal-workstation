@@ -601,6 +601,28 @@ nav.tabbar a.on .ic{transform:scale(1.05)}
   header.topbar{padding-left:50px}
 }
 
+/* ====== v3.21 产品收拢：驾驶舱 / 视图切换 / 数据健康 ====== */
+.today-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
+.today-action{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 6px;font-size:12px;font-weight:600;color:var(--text-2);box-shadow:var(--shadow-sm)}
+.today-action:active{transform:scale(.97)}
+.view-switch{position:sticky;top:calc(var(--topbar-h,105px) + 8px);z-index:20;display:flex;gap:5px;margin:0 0 14px;padding:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 12px var(--bg),var(--shadow-sm)}
+#page-money .sec{scroll-margin-top:calc(var(--topbar-h,105px) + var(--money-switch-h,50px) + 28px)}
+.view-switch button{flex:1;padding:9px 8px;border-radius:9px;font-size:13px;font-weight:650;color:var(--text-2)}
+.view-switch button.on{background:var(--text);color:#fff;box-shadow:var(--shadow-sm)}
+#page-money[data-money-view="entry"] [data-module="catExpense"],#page-money[data-money-view="entry"] [data-module="flowList"],#page-money[data-money-view="entry"] [data-module="fundManager"],#page-money[data-money-view="entry"] [data-module="assets"]{display:none!important}
+#page-money[data-money-view="analysis"] [data-module="moneyForm"],#page-money[data-money-view="analysis"] [data-module="fundManager"],#page-money[data-money-view="analysis"] [data-module="assets"]{display:none!important}
+#page-money[data-money-view="plan"] [data-module="moneyForm"],#page-money[data-money-view="plan"] [data-module="monthOverview"],#page-money[data-money-view="plan"] [data-module="catExpense"],#page-money[data-money-view="plan"] [data-module="flowList"]{display:none!important}
+.ln-group-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 7px}
+.ln-group-tabs button{padding:9px 4px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);font-size:12px;font-weight:700;color:var(--text-2)}
+.ln-group-tabs button.on{background:var(--text);border-color:var(--text);color:#fff}
+.storage-health-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.storage-health-item{padding:10px 6px;text-align:center;background:var(--card-soft);border:1px solid var(--line-soft);border-radius:var(--r-sm)}
+.storage-health-item b{display:block;font-size:15px}.storage-health-item span{display:block;margin-top:2px;font-size:10.5px;color:var(--text-3)}
+.storage-health-actions{display:flex;gap:8px}.storage-health-actions button{flex:1;padding:9px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;font-weight:600;font-size:12px}
+.storage-health-note{margin-top:10px;font-size:11.5px;color:var(--text-3);line-height:1.6}
+@media(max-width:759px){.today-actions{grid-template-columns:repeat(4,1fr)}.today-action{font-size:11.5px}.ln-group-tabs{grid-template-columns:1fr 1fr}.storage-health-grid{grid-template-columns:1fr 1fr 1fr}}
+@media(min-width:1100px){body.nav-open .app{max-width:1040px}.today-actions{grid-template-columns:repeat(4,1fr)}}
+
 /* ====== 通用 ====== */
 .row-between{display:flex;align-items:center;justify-content:space-between}
 .muted{color:var(--text-3);font-size:12px}
@@ -997,6 +1019,12 @@ summary::-webkit-details-marker{color:var(--text)}
           <div class="f-sub" id="focusTodoSub">暂无待办</div>
         </div>
       </div>
+      <div class="today-actions" aria-label="今日快捷操作">
+        <button class="today-action" id="todayGoTodo">＋ 待办</button>
+        <button class="today-action" id="todayGoMoney">＋ 记账</button>
+        <button class="today-action" id="todayGoHabit">✓ 打卡</button>
+        <button class="today-action" id="todayGoLearning">▷ 学习</button>
+      </div>
       <button class="qn-entry" id="qnEntry">
         <svg class="qn-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <div class="qn-tx"><div class="t">速记录入</div><div class="s">粘贴手机记录，自动拆分到各模块（记为今天）</div></div>
@@ -1050,7 +1078,12 @@ summary::-webkit-details-marker{color:var(--text)}
     </section>
 
     <!-- 账本 -->
-    <section class="page" id="page-money">
+    <section class="page" id="page-money" data-money-view="entry">
+      <div class="view-switch" id="moneyViewSwitch" aria-label="账本视图">
+        <button class="on" data-v="entry">记账</button>
+        <button data-v="analysis">分析</button>
+        <button data-v="plan">资金规划</button>
+      </div>
       <div class="sec" id="moneyFormSec" data-module="moneyForm">
         <div class="page-title">记一笔</div>
         <div class="card">
@@ -1346,6 +1379,16 @@ summary::-webkit-details-marker{color:var(--text)}
           <div class="set-row"><span class="lab">设置月预算</span><button id="budgetBtn">设置</button></div>
           <div class="set-row"><span class="lab">清空全部</span><button id="clearBtn" style="color:var(--bad)">清空</button></div>
           <div class="set-row"><span class="lab">模块显示与排序</span><button id="moduleManageBtn">编辑模块</button></div>
+        </div>
+        <div class="page-title" style="margin-top:14px">数据安全与容量</div>
+        <div class="card">
+          <div class="storage-health-grid">
+            <div class="storage-health-item"><b id="storageDataSize">—</b><span>当前数据</span></div>
+            <div class="storage-health-item"><b id="storageQuota">—</b><span>浏览器占用</span></div>
+            <div class="storage-health-item"><b id="storageMirror">检查中</b><span>本机镜像</span></div>
+          </div>
+          <div class="storage-health-actions"><button id="storageSnapshotBtn">立即创建快照</button><button id="storageRestoreBtn">从镜像恢复</button></div>
+          <div class="storage-health-note" id="storageHealthNote">现有 localStorage 保持兼容；每次修改会异步镜像到容量更大的 IndexedDB，并保留当前与上一代快照。</div>
         </div>
       </div>
       <div class="sec" data-module="lnOrganize">
@@ -3752,6 +3795,26 @@ const dateAdd=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 /* ============ 升级功能清单 ============ */
 const CHANGELOG=[
+  {version:'v3.21.3',date:'2026-08-31',modules:['账本'],status:'已上线',items:[
+    '账本三视图切换栏恢复吸顶，并动态跟随实际页头高度，避免与页头重叠',
+    '账本模块定位自动预留页头和切换栏高度，侧栏跳转与快捷记账不会遮住模块标题和内容'
+  ]},
+  {version:'v3.21.2',date:'2026-08-31',modules:['今日','账本'],status:'已上线',items:[
+    '修复今日快捷入口定位被固定页头遮挡，待办与打卡模块会完整露出',
+    '点击「＋记账」时固定进入记账视图，不再沿用上次停留的资金规划或分析视图'
+  ]},
+  {version:'v3.21.1',date:'2026-08-31',modules:['今日','账本','学习','我的'],status:'已上线',items:[
+    '修复账本切换器初始化报错，恢复今日四个快捷按钮及全站首次渲染',
+    '修复账本分析与资金规划高亮状态，并取消切换栏吸顶，避免滚动遮挡内容',
+    '恢复学习内容、更新日志等依赖首次渲染的模块'
+  ]},
+  {version:'v3.21.0',date:'2026-08-31',modules:['数据安全','今日','账本','学习','布局'],status:'已上线',items:[
+    '新增 IndexedDB 本机双代镜像：保留当前与上一代快照，localStorage 写满或异常时仍有恢复兜底',
+    '数据管理新增容量与镜像健康面板，可立即创建快照或从本机镜像恢复',
+    '今日页新增待办、记账、打卡、学习四个快捷入口；账本改为「记账 / 分析 / 资金规划」三视图，减少手机长滚动',
+    '学习方向内 10 个页签收拢为「计划 / 资料 / 知识 / 复习」四组，保留全部原功能',
+    '桌面宽屏首次打开默认展开侧栏，并记住用户的展开/收起选择'
+  ]},
   {version:'v3.20.41',date:'2026-08-28',modules:['云同步'],status:'已上线',items:[
     '登录弹窗新增「登录账号」展示行：已配置账号时醒目显示并标记「已设置」，多账户登录前即可辨认目标账户',
     '未配置登录账号时降级显示脱敏 Gist ID，并标记「用 Gist ID」，兼容既有账户配置'
@@ -3994,7 +4057,7 @@ const CHANGELOG=[
   {version:'v3.12',date:'2026-08-19',modules:['习惯打卡'],items:['习惯打卡支持「补卡」：可补打过去任意一天的习惯卡，计入连续天数与活跃热力；在热力页「打卡记录」点击某天也可补卡'],status:'已上线'},
   {version:'v3.11',date:'2026-08-17',modules:['习惯打卡','打卡记录'],items:['模块显示/隐藏配置接入云同步：手机端开启或关闭模块会同步到其他设备（任一端显示即显示，避免跨设备丢失）','习惯打卡支持「修改」（改名/换图标/换颜色，保留已打卡历史）与「删除」（仅隐藏习惯，已记录的历史打卡归档保留，可在热力页「打卡记录」查看）','热力页新增「打卡记录」模块：以图标形式展示每日心情打卡与习惯打卡（含已删除习惯的归档历史）'],status:'已上线'},
   {version:'v3.10',date:'2026-08-12',modules:['学习'],items:['学习模块强化：内容/问题/复习可绑定到计划任务节点（双轨：也允许只挂方向）','新增计划节点聚合页：点任务小标题查看该节点下资料/问题/知识/复习','录入表单增加关联节点下拉；复习自动继承来源节点','新增tab：错题(难点归集)/资源(资料型)/大纲(树+计数)/时间轴/自测记录','知识库按节点聚合；问题可一键标记难点'],status:'已上线'},
-  {version:'v3.9.1-test',date:'2026-08-12',modules:['云同步'],items:['同步防丢数据修复（与正式版 v3.8.1 同源）：改为按 id 合并同步，本地已有记录永不删除','推送失败指数退避自动重试（5s→10s→…上限60s）','页面切后台/关闭时强制 flush 本地未上云数据','「立即同步」改为先推本地再拉云合并的双向同步','注：本测试版同时含「学习」大模块（v3.9-test）'],status:'已上线'},
+  {version:'v3.9.1',date:'2026-08-12',modules:['云同步'],items:['同步防丢数据修复（与正式版 v3.8.1 同源）：改为按 id 合并同步，本地已有记录永不删除','推送失败指数退避自动重试（5s→10s→…上限60s）','页面切后台/关闭时强制 flush 本地未上云数据','「立即同步」改为先推本地再拉云合并的双向同步','注：本测试版同时含「学习」大模块（v3.9-test）'],status:'已上线'},
   {version:'v3.9-test',date:'2026-08-12',modules:['学习'],items:['新增「学习」大模块：自定义学习方向与内容（方向下挂「资料 / 子主题」二级）','UX 重构为「方向即主页」：取消顶部 6 Tab，改为方向卡片展开，一个卡片内直接切换计划/内容/问题/知识库/复习，减少来回切换','支持一键快速添加：方向内直接输入标题新建计划（带模板）/ 内容 / 问题，无需先切 Tab 再进弹窗','计划支持模板快速创建：21 天入门 / 读书笔记 / 项目实战，自动生成阶段与任务','问题状态支持点击徽章单键循环切换（未解决 → 解决中 → 已解决）','已解决问题可一键加入复习，按 1/3/7/16/30 天间隔递增提醒','手动制定学习计划：方向 → 阶段 → 任务 → 截止日，自动计算完成进度','已解决问题与答案自动沉淀为「知识库」，可搜索','学习数据随导出 / 导入 / 合并导入 / 云同步自动携带'],status:'已上线'},
   {version:'v3.7-test',date:'2026-08-10',modules:['账本'],items:[
     '账单「支出类型」新增「计入月预算」开关：可逐类选择是否计入月预算，关闭的类型仍记为支出（成本）但不占用预算额度、不计入超支判断',
@@ -4058,8 +4121,19 @@ function load(){
     return d;
   }catch(e){return structuredClone(DEFAULT)}
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+const IDB_NAME='lifeworkbench_local_v1',IDB_STORE='snapshots';
+let mirrorTimer=null,mirrorState='等待写入',lastLocalSaveError='';
+function stateJson(){return JSON.stringify(S)}
+function fmtBytes(n){if(!Number.isFinite(n))return '—';if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(n<10240?1:0)+' KB';return (n/1048576).toFixed(2)+' MB'}
+function openLocalMirror(){return new Promise((resolve,reject)=>{if(!window.indexedDB){reject(new Error('浏览器不支持 IndexedDB'));return}const q=indexedDB.open(IDB_NAME,1);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains(IDB_STORE))q.result.createObjectStore(IDB_STORE,{keyPath:'slot'})};q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error||new Error('镜像数据库打开失败'))})}
+async function readLocalMirror(slot='current'){const db=await openLocalMirror();return new Promise((resolve,reject)=>{const q=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(slot);q.onsuccess=()=>{db.close();resolve(q.result||null)};q.onerror=()=>{db.close();reject(q.error)}})}
+async function writeLocalMirror(json,manual=false){try{const db=await openLocalMirror();await new Promise((resolve,reject)=>{const tx=db.transaction(IDB_STORE,'readwrite'),st=tx.objectStore(IDB_STORE),get=st.get('current');get.onsuccess=()=>{if(get.result)st.put({...get.result,slot:'previous'});st.put({slot:'current',json,updatedAt:S.updatedAt||Date.now(),savedAt:Date.now(),manual});};tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();mirrorState='正常';lastLocalSaveError='';renderStorageHealth()}catch(e){mirrorState='失败';lastLocalSaveError=e.message||String(e);renderStorageHealth()}}
+function queueLocalMirror(json){clearTimeout(mirrorTimer);mirrorState='待同步';mirrorTimer=setTimeout(()=>writeLocalMirror(json),700)}
+function save(){const json=stateJson();let ok=true;try{localStorage.setItem(KEY,json)}catch(e){ok=false;lastLocalSaveError='localStorage 写入失败：'+(e.message||e);toast('本地存储空间不足，已转存安全镜像')}queueLocalMirror(json);renderStorageHealth();return ok}
 function persist(){S.updatedAt=Date.now();save();schedulePush()}
+async function renderStorageHealth(){const a=$('#storageDataSize'),b=$('#storageQuota'),c=$('#storageMirror'),n=$('#storageHealthNote');if(!a||!b||!c)return;let json='';try{json=stateJson()}catch(e){}a.textContent=fmtBytes(new Blob([json]).size);c.textContent=mirrorState;if(n)n.textContent=lastLocalSaveError||'现有 localStorage 保持兼容；每次修改会异步镜像到容量更大的 IndexedDB，并保留当前与上一代快照。';if(navigator.storage&&navigator.storage.estimate){try{const e=await navigator.storage.estimate();b.textContent=fmtBytes(e.usage||0);b.title='预计可用 '+fmtBytes(e.quota||0)}catch(e){b.textContent='未知'}}else b.textContent='不支持'}
+async function createLocalSnapshot(){mirrorState='写入中';renderStorageHealth();await writeLocalMirror(stateJson(),true);toast(mirrorState==='正常'?'本机安全快照已创建':'快照创建失败')}
+async function restoreLocalSnapshot(){try{const snap=await readLocalMirror('current');if(!snap||!snap.json){toast('还没有可恢复的本机镜像');return}const when=new Date(snap.savedAt||snap.updatedAt).toLocaleString('zh-CN');modal(`<h4>从本机镜像恢复<span class="modal-close" onclick="closeModal()">×</span></h4><p style="color:var(--text-2)">将恢复 ${when} 的快照。当前数据会先写入上一代镜像，确认继续？</p><div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="ok" id="mirrorRestoreGo">恢复</button></div>`,{noMaskClose:true});$('#mirrorRestoreGo').onclick=()=>{try{const d=JSON.parse(snap.json);writeLocalMirror(stateJson(),true);S=Object.assign(structuredClone(DEFAULT),d);if(Array.isArray(d.modules))restoreModules(d.modules);persist();closeModal();renderAll();toast('已从本机镜像恢复')}catch(e){toast('镜像数据无法读取')}}}catch(e){toast('读取本机镜像失败')}}
 
 /* ============ 弹窗 ============ */
 let modalOpts={};
@@ -4368,7 +4442,9 @@ function renderSidebar(tabKey){
       const hdr=document.querySelector('header.topbar');
       const hdrBottom=hdr?hdr.getBoundingClientRect().bottom:0;
       const rect=t.getBoundingClientRect();
-      const absTop=rect.top+window.scrollY-Math.max(0,hdrBottom)-10;
+      const moneySwitch=t.closest('#page-money')?$('#moneyViewSwitch'):null;
+      const stickyExtra=moneySwitch?moneySwitch.getBoundingClientRect().height+18:0;
+      const absTop=rect.top+window.scrollY-Math.max(0,hdrBottom)-stickyExtra-10;
       window.scrollTo({top:Math.max(0,absTop),behavior:'smooth'});
       /* 视觉提示：1.3s 高亮闪烁 */
       if(!t.classList.contains('sec-flash')){t.classList.add('sec-flash');setTimeout(()=>t.classList.remove('sec-flash'),1300);}
@@ -4384,6 +4460,7 @@ $$('nav.tabbar a').forEach(a=>a.addEventListener('click',()=>{
   $$('nav.tabbar a').forEach(x=>x.classList.remove('on'));a.classList.add('on');
   const p=a.dataset.p;$$('.page').forEach(x=>x.classList.remove('active'));
   $('#page-'+p).classList.add('active');
+  requestAnimationFrame(syncStickyOffsets);
   if(p==='today')renderWorklog();if(p==='money')renderMoney();if(p==='heat')renderHeat();if(p==='notes')renderNotes();if(p==='history')renderActiveHis();if(p==='learning')renderLearning();
   /* v3.20.31: 切换 tab 后刷新侧边栏二级模块 */
   renderSidebar(p);
@@ -4404,7 +4481,9 @@ $$('nav.tabbar a').forEach(a=>a.addEventListener('click',()=>{
       /* 关键：减去 sticky 顶栏高度，否则卡片顶部被顶栏遮住（E2E 实测 rectTop=0 vs 顶栏底 107px） */
       const hdr=document.querySelector('header.topbar');
       const hdrBottom=hdr?hdr.getBoundingClientRect().bottom:0;
-      const absTop=rect.top+window.scrollY-Math.max(0,hdrBottom)-8;
+      const moneySwitch=t.closest('#page-money')?$('#moneyViewSwitch'):null;
+      const stickyExtra=moneySwitch?moneySwitch.getBoundingClientRect().height+18:0;
+      const absTop=rect.top+window.scrollY-Math.max(0,hdrBottom)-stickyExtra-8;
       window.scrollTo({top:Math.max(0,absTop),behavior});
       if(!t.classList.contains('sec-flash')){t.classList.add('sec-flash');setTimeout(()=>t.classList.remove('sec-flash'),1300);}
     };
@@ -4424,6 +4503,7 @@ function goTab(p,opts){
   t.addEventListener('click',()=>{
     /* v3.20.34：桌面与移动共用 nav-open 类（CSS 默认 .side-nav 折叠，body.nav-open 时展开） */
     document.body.classList.toggle('nav-open');
+    try{localStorage.setItem('wb_sidebar_open',document.body.classList.contains('nav-open')?'1':'0')}catch(e){}
   });
   if(mask){
     mask.addEventListener('click',()=>{
@@ -4436,6 +4516,7 @@ function goTab(p,opts){
   });
   /* 初始化：渲染默认 tab 的二级模块 */
   const initialKey=($$('nav.tabbar a.on')[0]||$$('nav.tabbar a')[0]).dataset.p;
+  if(window.innerWidth>=1100){try{if(localStorage.getItem('wb_sidebar_open')!=='0')document.body.classList.add('nav-open')}catch(e){document.body.classList.add('nav-open')}}
   renderSidebar(initialKey);
 })();
 
@@ -7204,13 +7285,40 @@ function openModuleManager(){
   $('#moduleDoneBtn').onclick=()=>{closeModal();applyModuleLayout();toast('模块布局已保存')};
 }
 $('#moduleManageBtn').onclick=openModuleManager;
+const _ss=$('#storageSnapshotBtn');if(_ss)_ss.onclick=createLocalSnapshot;
+const _sr=$('#storageRestoreBtn');if(_sr)_sr.onclick=restoreLocalSnapshot;
+function syncStickyOffsets(){const hdr=document.querySelector('header.topbar');if(hdr)document.documentElement.style.setProperty('--topbar-h',Math.ceil(hdr.getBoundingClientRect().height)+'px');const sw=$('#moneyViewSwitch');if(sw&&sw.getBoundingClientRect().height)document.documentElement.style.setProperty('--money-switch-h',Math.ceil(sw.getBoundingClientRect().height)+'px')}
+syncStickyOffsets();window.addEventListener('resize',syncStickyOffsets);if(window.ResizeObserver){const _stickyRO=new ResizeObserver(syncStickyOffsets);const _stickyHdr=document.querySelector('header.topbar');if(_stickyHdr)_stickyRO.observe(_stickyHdr)}
+const MONEY_VIEW_KEY='wb_money_view_v1';
+function setMoneyView(v){const page=$('#page-money');if(!page)return;const allowed=['entry','analysis','plan'];if(!allowed.includes(v))v='entry';page.dataset.moneyView=v;try{localStorage.setItem(MONEY_VIEW_KEY,v)}catch(e){}$$('#moneyViewSwitch button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if($('#page-money').classList.contains('active'))window.scrollTo({top:0,behavior:'auto'})}
+$$('#moneyViewSwitch button').forEach(b=>b.onclick=()=>setMoneyView(b.dataset.v));
+try{setMoneyView(localStorage.getItem(MONEY_VIEW_KEY)||'entry')}catch(e){setMoneyView('entry')}
+const _todayJump=(id,fn)=>{const el=$(id);if(el)el.onclick=fn};
+function scrollTodayModule(sel){
+  const scrollToTarget=(behavior)=>{
+    const t=$(sel);if(!t)return;
+    const hdr=document.querySelector('header.topbar');
+    const hdrBottom=hdr?hdr.getBoundingClientRect().bottom:0;
+    const rect=t.getBoundingClientRect();
+    const absTop=rect.top+window.scrollY-Math.max(0,hdrBottom)-10;
+    window.scrollTo({top:Math.max(0,absTop),behavior});
+    if(!t.classList.contains('sec-flash')){t.classList.add('sec-flash');setTimeout(()=>t.classList.remove('sec-flash'),1300);}
+  };
+  scrollToTarget('smooth');
+  setTimeout(()=>scrollToTarget('auto'),400);
+}
+_todayJump('#todayGoTodo',()=>scrollTodayModule('[data-module="todos"]'));
+_todayJump('#todayGoHabit',()=>scrollTodayModule('[data-module="habits"]'));
+_todayJump('#todayGoMoney',()=>{setMoneyView('entry');goTab('money',{scrollTo:'#moneyFormSec'})});
+_todayJump('#todayGoLearning',()=>goTab('learning'));
+queueLocalMirror(stateJson());
 
 /* ============ 全局渲染 ============ */
 function initFilters(){
   const[mf,mt]=rangeOf('thisMonth');setFlowRange(mf,mt,'thisMonth');
   const[hf,ht]=rangeOf('7');setHisRange(hf,ht,'7');
 }
-function renderAll(){renderHeader();renderTodos();renderHabits();renderMoney();renderHeat();renderHistory();renderNotes();renderWorklog();renderTodayStat();renderFocusCard();renderChangelog();renderAbout();renderLearning();applyModuleLayout()}
+function renderAll(){renderHeader();renderTodos();renderHabits();renderMoney();renderHeat();renderHistory();renderNotes();renderWorklog();renderTodayStat();renderFocusCard();renderChangelog();renderAbout();renderLearning();applyModuleLayout();renderStorageHealth()}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 /* 首次使用预置示例 */
@@ -7366,7 +7474,11 @@ function renderLnDetail(){
   if(!d){lnCurrentDir=null;renderLnHome();return}
   var ov=$('#lnOverview'); if(ov)ov.style.display='none';
   const st=lnDirStats(d,L0);const pct=st.total?Math.round(st.done/st.total*100):0;
-  const tabs=[['plans','计划'],['contents','内容'],['questions','问题'],['kb','知识库'],['reviews','复习'],['mistakes','错题'],['resources','资源'],['outline','大纲'],['timeline','时间轴'],['selftests','自测']];
+  const groups=[['plan','计划','plans'],['material','资料','contents'],['knowledge','知识','questions'],['review','复习','reviews']];
+  const groupTabs={plan:[['plans','计划'],['timeline','时间轴']],material:[['contents','内容'],['resources','资源'],['outline','大纲']],knowledge:[['questions','问题'],['kb','知识库'],['mistakes','错题']],review:[['reviews','复习'],['selftests','自测']]};
+  let activeGroup=groups.find(([g,n])=>(groupTabs[g]||[]).some(([k])=>k===lnDetailTab));if(!activeGroup){lnDetailTab='plans';activeGroup=groups[0]}
+  const groupHtml=groups.map(([g,n,k])=>`<button class="ln-group-tab ${activeGroup[0]===g?'on':''}" data-g="${g}" data-default="${k}">${n}</button>`).join('');
+  const tabs=groupTabs[activeGroup[0]];
   const tabHtml=tabs.map(([k,n])=>`<button class="ln-dir-tab ${lnDetailTab===k?'on':''}" data-t="${k}" ${lnDetailTab===k?`style="background:${d.color};border-color:${d.color};color:#fff"`:''}>${n}</button>`).join('');
   let bodyHtml='';
   if(lnDetailTab==='plans')bodyHtml=renderLnDirPlans(d,L0);
@@ -7386,8 +7498,10 @@ function renderLnDetail(){
       <div class="ln-detail-acts"><button onclick="openLnDirModal('${d.id}')">编辑</button><button onclick="lnToggleDir('${d.id}')">${d.active?'停用':'启用'}</button><button onclick="lnDelDir('${d.id}')" style="color:var(--bad)">删除</button></div>
     </div>
     ${st.total?`<div class="ln-bar" style="margin:2px 12px 0"><i style="width:${pct}%;background:${d.color}"></i></div>`:''}
+    <div class="ln-group-tabs">${groupHtml}</div>
     <div class="ln-tabs ln-dir-tabs">${tabHtml}</div>
     <div class="ln-dir-section">${bodyHtml}</div>`;
+  $('#lnBody').querySelectorAll('.ln-group-tab').forEach(b=>{b.onclick=()=>{lnDetailTab=b.dataset.default;renderLnDetail()}});
   $('#lnBody').querySelectorAll('.ln-dir-tab').forEach(b=>{b.onclick=()=>{lnDetailTab=b.dataset.t;renderLnDetail()}});
 }
 function renderLnOverview(){
